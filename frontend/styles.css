@@ -193,6 +193,22 @@ body::after {
   transform: none;
 }
 
+/* ---- Versão sem foto (só número e texto) ---- */
+.hero--sem-foto {
+  height: auto;
+  background: var(--verde-escuro);
+  padding: 22px 4px;
+}
+
+.hero--sem-foto .hero-conteudo {
+  position: static;
+  padding: 0 20px;
+}
+
+.auth-conteudo--sem-foto {
+  padding-top: 28px;
+}
+
 /* ---- Login / Cadastro ---- */
 .auth-wrap {
   min-height: calc(100vh - 40px);
