@@ -1,0 +1,16 @@
+.env
+.env.local
+.env.*.local
+
+node_modules/
+dist/
+*.log
+
+backend/scripts/seed_bairros.py
+backend/scripts/fix_colisoes.py
+
+# Cópia solta do template original, não usada (o backend/ já tem tudo aplicado)
+/ddd-template-main/
+
+relatorios/__pycache__/
+relatorios/*.pyc
