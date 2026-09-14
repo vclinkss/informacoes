@@ -20,6 +20,8 @@
 
 html, body {
   min-height: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -612,7 +614,8 @@ button:disabled {
 }
 
 .chart-box {
-  width: 280px;
+  width: 100%;
+  max-width: 280px;
 }
 
 .chart-box p {
@@ -664,6 +667,7 @@ button:disabled {
 
 .papel-item {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   justify-content: space-between;
@@ -673,6 +677,16 @@ button:disabled {
 
 .papel-item:last-child {
   border-bottom: none;
+}
+
+.papel-item > div {
+  min-width: 0;
+  flex: 1 1 180px;
+}
+
+.papel-item .nome,
+.papel-item .detalhe {
+  overflow-wrap: anywhere;
 }
 
 .papel-item select {
@@ -698,6 +712,7 @@ button:disabled {
 
 .pendente-item {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   justify-content: space-between;
@@ -709,8 +724,14 @@ button:disabled {
   border-bottom: none;
 }
 
+.pendente-info {
+  min-width: 0;
+  flex: 1 1 180px;
+}
+
 .pendente-info p {
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .pendente-acoes {
