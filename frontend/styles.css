@@ -349,6 +349,33 @@ body::after {
   margin: 0 0 16px;
 }
 
+.card-titulo--alternavel {
+  width: 100%;
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  justify-content: space-between;
+  text-transform: uppercase;
+}
+
+.card-titulo--alternavel:hover {
+  transform: none;
+  box-shadow: none;
+  opacity: 0.85;
+}
+
+.seta-alternavel {
+  margin-left: auto;
+  transition: transform 0.15s ease;
+}
+
+.seta-alternavel.aberta {
+  transform: rotate(180deg);
+}
+
 .card-titulo::before {
   content: "";
   width: 5px;

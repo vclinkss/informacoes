@@ -105,9 +105,11 @@
     </section>
 
     <section class="card" id="cardGerenciarPapeis" hidden>
-      <h2 class="card-titulo">Papel de cada líder</h2>
-      <p class="detalhe">"Líder" só vê os próprios cadastros. "Agenda" e "Admin" veem tudo.</p>
-      <div id="listaPapeis"></div>
+      <button type="button" class="card-titulo card-titulo--alternavel" id="btnAlternarPapeis">
+        Papel de cada líder
+        <span class="seta-alternavel" id="setaPapeis">▾</span>
+      </button>
+      <div id="listaPapeis" hidden></div>
     </section>
 
     <div class="grid-formularios">

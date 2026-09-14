@@ -720,6 +720,13 @@ async function carregarPapeis() {
   });
 }
 
+document.getElementById("btnAlternarPapeis").addEventListener("click", function () {
+  var lista = document.getElementById("listaPapeis");
+  var seta = document.getElementById("setaPapeis");
+  lista.hidden = !lista.hidden;
+  seta.classList.toggle("aberta", !lista.hidden);
+});
+
 // ---- Logística de transporte: mapa (OpenStreetMap/Leaflet) + tabela bairro -> local de votação ----
 var mapaLeaflet = null;
 var camadaLogistica = null;
