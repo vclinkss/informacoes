@@ -1088,6 +1088,17 @@ async function iniciarApp() {
     return;
   }
 
+  // Líder não usa este acesso — só o link específico dele.
+  if (usuario.role === "lider") {
+    token = null;
+    usuario = null;
+    localStorage.removeItem("token");
+    mostrarLogin();
+    mostrarAuth();
+    mostrarErroEm("erroAuth", "Este acesso não está disponível para o seu perfil.");
+    return;
+  }
+
   var rotulosPapel = { admin: "Administrador", agenda: "Agenda", motorista: "Motorista", lider: "Líder" };
   document.getElementById("heroSubtitulo").textContent = (rotulosPapel[usuario.role] || "Líder") + " · " + usuario.nome;
 
