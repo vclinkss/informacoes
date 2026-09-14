@@ -2,7 +2,7 @@
 const API_BASE_URL = "https://informacoes.onrender.com/api";
 
 // ---- Estado local ----
-var token = localStorage.getItem("token") || null;
+var token = localStorage.getItem("token") || sessionStorage.getItem("token") || null;
 var usuario = null; // { id, nome, email, role, status }
 var contatos = [];  // [{ id, liderId, lider, nome, endereco, bairro, whatsapp, votacao, liguei, obs }]
 
@@ -108,7 +108,14 @@ document.getElementById("btnLogin").addEventListener("click", async function () 
     var resultado = await api("/auth/login", { method: "POST", body: JSON.stringify({ email: email, senha: senha }) });
     token = resultado.token;
     usuario = resultado.usuario;
-    localStorage.setItem("token", token);
+    var manterConectado = document.getElementById("manterConectado").checked;
+    if (manterConectado) {
+      localStorage.setItem("token", token);
+      sessionStorage.removeItem("token");
+    } else {
+      sessionStorage.setItem("token", token);
+      localStorage.removeItem("token");
+    }
     document.getElementById("loginSenha").value = "";
     limparErroEm("erroAuth");
     mostrarCarregando();
@@ -151,6 +158,7 @@ document.getElementById("btnSair").addEventListener("click", function () {
   token = null;
   usuario = null;
   localStorage.removeItem("token");
+  sessionStorage.removeItem("token");
   mostrarLogin();
   mostrarAuth();
 });
@@ -1125,6 +1133,7 @@ async function iniciarApp() {
     token = null;
     usuario = null;
     localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
     mostrarLogin();
     mostrarAuth();
     return;
@@ -1135,6 +1144,7 @@ async function iniciarApp() {
     token = null;
     usuario = null;
     localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
     mostrarLogin();
     mostrarAuth();
     mostrarErroEm("erroAuth", "Este acesso não está disponível para o seu perfil.");

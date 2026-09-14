@@ -622,6 +622,21 @@ button:disabled {
   color: var(--texto);
 }
 
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 2px 0 14px;
+  font-size: 13.5px;
+  color: var(--texto-suave);
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
 .charts {
   display: flex;
   flex-wrap: wrap;
