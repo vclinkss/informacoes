@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<title>Painel da Equipe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+</head>
+<body>
+
+<div class="pagina">
+
+  <!-- ---- Login / Cadastro (visível enquanto não autenticado) ---- -->
+  <div id="viewAuth" class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-conteudo auth-conteudo--sem-foto">
+        <h1>Painel da Equipe</h1>
+        <p class="detalhe">Cadastro de líderes e apoiadores</p>
+
+        <div id="formLogin">
+          <h2 class="card-titulo">Entrar</h2>
+          <div class="erro" id="erroAuth"></div>
+          <label for="loginEmail">E-mail</label>
+          <input type="email" id="loginEmail" placeholder="voce@email.com" />
+          <label for="loginSenha">Senha</label>
+          <input type="password" id="loginSenha" placeholder="Sua senha" />
+          <button type="button" id="btnLogin">Entrar</button>
+          <p class="detalhe auth-troca">Ainda não tem conta? <a href="#" id="linkIrCadastro">Cadastre-se</a></p>
+        </div>
+
+        <div id="formCadastro" hidden>
+          <h2 class="card-titulo">Criar conta</h2>
+          <div class="erro" id="erroCadastro"></div>
+          <p class="detalhe">Depois de se cadastrar, um administrador precisa aprovar seu acesso antes de você conseguir entrar.</p>
+          <label for="cadNome">Nome completo</label>
+          <input type="text" id="cadNome" placeholder="Seu nome" />
+          <label for="cadEmail">E-mail</label>
+          <input type="email" id="cadEmail" placeholder="voce@email.com" />
+          <label for="cadSenha">Senha</label>
+          <input type="password" id="cadSenha" placeholder="Mínimo 6 caracteres" />
+          <button type="button" id="btnCadastrar">Cadastrar</button>
+          <p class="detalhe auth-troca">Já tem conta? <a href="#" id="linkIrLogin">Entrar</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---- Carregando (transição entre login e painel) ---- -->
+  <div id="viewCarregando" class="auth-wrap" hidden>
+    <div class="carregando">
+      <div class="spinner"></div>
+      <p>Entrando...</p>
+    </div>
+  </div>
+
+  <!-- ---- App (visível só depois de autenticado) ---- -->
+  <div id="viewApp" hidden>
+
+    <header class="hero hero--sem-foto">
+      <button type="button" id="btnSair" class="hero-sair">Sair</button>
+      <div class="hero-conteudo">
+        <h1>Painel da Equipe</h1>
+        <p id="heroSubtitulo">Cadastro de líderes e apoiadores</p>
+      </div>
+    </header>
+
+    <div id="secaoOperacional">
+    <section class="stats-row" id="statsRow">
+      <div class="stat">
+        <span class="stat-valor" id="statTotal">–</span>
+        <span class="stat-label" id="statTotalLabel">Contatos cadastrados</span>
+      </div>
+      <div class="stat">
+        <span class="stat-valor" id="statLigados">–</span>
+        <span class="stat-label">Já ligaram</span>
+      </div>
+      <div class="stat">
+        <span class="stat-valor" id="statTerceiro">–</span>
+        <span class="stat-label" id="statTerceiroLabel">Bairros diferentes</span>
+      </div>
+    </section>
+
+    <div class="aviso" id="avisoConfig">
+      Não consegui falar com a API. Confirme que o backend está rodando (pasta <code>backend/</code>, comando
+      <code>npm run dev</code>) e que a URL configurada em <code>app.js</code> (constante <code>API_BASE_URL</code>) está correta.
+    </div>
+
+    <section class="card" id="cardPendentes" hidden>
+      <h2 class="card-titulo">Líderes aguardando aprovação</h2>
+      <div id="listaPendentes"></div>
+    </section>
+
+    <section class="card" id="cardGerenciarPapeis" hidden>
+      <h2 class="card-titulo">Papel de cada líder</h2>
+      <p class="detalhe">"Líder" só vê os próprios cadastros. "Agenda" e "Admin" veem tudo.</p>
+      <div id="listaPapeis"></div>
+    </section>
+
+    <div class="grid-formularios">
+      <section class="card atraso-1">
+        <h2 class="card-titulo">Buscar contato</h2>
+        <label for="busca">Nome, bairro ou líder</label>
+        <input type="text" id="busca" placeholder="Digite pra filtrar a lista" />
+      </section>
+
+      <section class="card atraso-2" id="cardNovoContato">
+        <h2 class="card-titulo">Novo contato</h2>
+        <div class="erro" id="erro"></div>
+        <label>Nome completo</label>
+        <input type="text" id="nome" placeholder="Ana Silva" autocomplete="off" />
+        <div class="campo-com-busca">
+          <label>Endereço</label>
+          <input type="text" id="endereco" placeholder="Rua das Flores, 123" autocomplete="off" />
+          <div class="sugestoes-caixa" id="sugestoesEndereco" hidden></div>
+        </div>
+        <p class="detalhe">Se aparecer o endereço certo na lista, escolha ele — assim sua casa aparece certinha no mapa (opcional).</p>
+        <div class="grid2">
+          <div>
+            <label>Bairro</label>
+            <select id="bairro">
+              <option value="">Selecione o bairro...</option>
+            </select>
+          </div>
+          <div>
+            <label>WhatsApp</label>
+            <input type="tel" id="whatsapp" placeholder="(96) 99999-9999" autocomplete="off" />
+          </div>
+        </div>
+        <div class="campo-com-busca">
+          <label>Local de votação</label>
+          <input type="text" id="votacao" placeholder="Digite o nome da escola e escolha na lista" autocomplete="off" />
+          <div class="sugestoes-caixa" id="sugestoesVotacao" hidden></div>
+        </div>
+        <p class="detalhe" id="statusLocalizacao">Digite pelo menos 3 letras e escolha uma opção da lista — é obrigatório, pra garantir que o local fique exato.</p>
+        <button type="button" id="salvar">Salvar contato</button>
+      </section>
+    </div>
+
+    <h2 id="tituloLista" class="titulo-secao">Meus contatos</h2>
+    <div id="lista"><p class="detalhe">Carregando...</p></div>
+
+    <h2 class="titulo-secao titulo-secao--espacada">Contatos por bairro e por local de votação</h2>
+    <div class="charts">
+      <div class="chart-box"><canvas id="chartBairro"></canvas></div>
+      <div class="chart-box"><canvas id="chartEscola"></canvas></div>
+    </div>
+
+    <h2 class="titulo-secao titulo-secao--espacada">Logística de transporte (bairro → local de votação)</h2>
+    <section class="card">
+      <div class="logistica-config">
+        <label for="pessoasPorCarro">Pessoas por carro</label>
+        <input type="number" id="pessoasPorCarro" min="1" value="4" />
+      </div>
+      <p class="detalhe" id="resumoLogistica">Carregando...</p>
+      <div id="mapaLogistica" class="mapa-logistica"></div>
+      <p class="detalhe" id="avisoNaoLocalizados"></p>
+      <div class="tabela-scroll">
+        <table class="tabela-logistica" id="tabelaLogistica">
+          <thead>
+            <tr><th>Bairro</th><th>Local de votação</th><th>Pessoas</th><th>Carros</th></tr>
+          </thead>
+          <tbody id="corpoTabelaLogistica"></tbody>
+        </table>
+      </div>
+    </section>
+    </div>
+
+    <div id="secaoAgenda" hidden>
+      <h2 class="titulo-secao titulo-secao--espacada">Agenda de compromissos</h2>
+      <div class="grid-formularios">
+        <section class="card atraso-1">
+          <h2 class="card-titulo">Novo compromisso</h2>
+          <div class="erro" id="erroAgenda"></div>
+          <label>Nome</label>
+          <input type="text" id="agendaNome" placeholder="Nome da pessoa" autocomplete="off" />
+          <div class="grid2">
+            <div>
+              <label>WhatsApp</label>
+              <input type="tel" id="agendaWhatsapp" placeholder="(96) 99999-9999" autocomplete="off" />
+            </div>
+            <div>
+              <label>Data e hora</label>
+              <input type="datetime-local" id="agendaDataHora" />
+            </div>
+          </div>
+          <label>Local</label>
+          <input type="text" id="agendaLocal" placeholder="Onde vai ser" autocomplete="off" />
+          <label>Observação</label>
+          <input type="text" id="agendaObservacao" placeholder="Opcional" autocomplete="off" />
+          <button type="button" id="salvarAgendamento">Salvar compromisso</button>
+        </section>
+
+        <section class="card atraso-2">
+          <h2 id="tituloAgenda" class="card-titulo">Compromissos</h2>
+          <div id="listaAgenda"><p class="detalhe">Carregando...</p></div>
+        </section>
+      </div>
+    </div>
+
+    <footer class="rodape">Cadastro de Apoiadores</footer>
+
+  </div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
