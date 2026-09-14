@@ -115,8 +115,14 @@
     <div class="grid-formularios">
       <section class="card atraso-1">
         <h2 class="card-titulo">Buscar contato</h2>
-        <label for="busca">Nome, bairro ou líder</label>
+        <label for="busca">Nome ou bairro</label>
         <input type="text" id="busca" placeholder="Digite pra filtrar a lista" />
+        <div id="campoFiltroLider" hidden>
+          <label for="filtroLider">Filtrar por líder</label>
+          <select id="filtroLider">
+            <option value="">Todos os líderes</option>
+          </select>
+        </div>
       </section>
 
       <section class="card atraso-2" id="cardNovoContato">

@@ -313,6 +313,7 @@ async function carregarContatos() {
       votacao: c.localVotacao,
       liguei: c.liguei,
       obs: c.observacao || "",
+      dataCadastro: c.dataCadastro,
     };
   });
   renderLista();
@@ -397,17 +398,28 @@ function renderCardEdicao(c) {
   );
 }
 
+function formatarDataCadastro(iso) {
+  if (!iso) return "";
+  var d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  var dataStr = d.toLocaleDateString("pt-BR");
+  var horaStr = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  return dataStr + " às " + horaStr;
+}
+
 function renderLista() {
   var termo = document.getElementById("busca").value.trim().toLowerCase();
-  var filtrados = termo
-    ? contatos.filter(function (c) {
-        return (
-          c.nome.toLowerCase().indexOf(termo) !== -1 ||
-          c.bairro.toLowerCase().indexOf(termo) !== -1 ||
-          c.lider.toLowerCase().indexOf(termo) !== -1
-        );
-      })
-    : contatos;
+  var liderFiltroEl = document.getElementById("filtroLider");
+  var liderFiltro = liderFiltroEl ? liderFiltroEl.value : "";
+
+  var filtrados = contatos.filter(function (c) {
+    var passaTexto = !termo ||
+      c.nome.toLowerCase().indexOf(termo) !== -1 ||
+      c.bairro.toLowerCase().indexOf(termo) !== -1 ||
+      c.lider.toLowerCase().indexOf(termo) !== -1;
+    var passaLider = !liderFiltro || String(c.liderId) === liderFiltro;
+    return passaTexto && passaLider;
+  });
 
   var lista = document.getElementById("lista");
   if (filtrados.length === 0) {
@@ -425,9 +437,11 @@ function renderLista() {
     var pillClasse = c.liguei ? "status-pill--sim" : "status-pill--nao";
     var pillTexto = c.liguei ? "Ligou" : "Pendente";
     var atraso = Math.min(idx * 0.05, 0.5);
+    var dataStr = formatarDataCadastro(c.dataCadastro);
     var linhaLider = mostrarLiderNaLinha
       ? '<p class="detalhe">' + ICONE_USERS + 'Líder: ' + c.lider + " · Vota em " + c.votacao + "</p>"
       : '<p class="detalhe">' + ICONE_USERS + "Vota em " + c.votacao + "</p>";
+    var linhaData = dataStr ? '<p class="detalhe detalhe--data">Cadastrado em ' + dataStr + "</p>" : "";
 
     var rodapeEdicao = somenteLeitura
       ? ""
@@ -453,6 +467,7 @@ function renderLista() {
             '<p class="nome">' + c.nome + ' <span class="status-pill ' + pillClasse + '">' + pillTexto + "</span></p>" +
             '<p class="detalhe">' + ICONE_PIN + c.endereco + " - " + c.bairro + "</p>" +
             linhaLider +
+            linhaData +
           "</div>" +
           '<a class="whatsapp-link" href="' + waLink(c.whatsapp) + '" target="_blank" rel="noopener">' + ICONE_PHONE + c.whatsapp + "</a>" +
         "</div>" +
@@ -591,6 +606,7 @@ function renderLista() {
   });
 }
 document.getElementById("busca").addEventListener("input", renderLista);
+document.getElementById("filtroLider").addEventListener("change", renderLista);
 
 // ---- Gráficos donut: por bairro e por local de votação (a partir da lista já carregada) ----
 var chartBairro = null;
@@ -674,10 +690,28 @@ async function atualizarStatusLider(id, status) {
   }
 }
 
+function popularFiltroLider(aprovados) {
+  var campo = document.getElementById("campoFiltroLider");
+  var select = document.getElementById("filtroLider");
+  if (!campo || !select) return;
+  if (!usuario || usuario.role !== "admin" || !aprovados.length) {
+    campo.hidden = true;
+    return;
+  }
+  campo.hidden = false;
+  var valorAtual = select.value;
+  select.innerHTML = '<option value="">Todos os líderes</option>' +
+    aprovados.map(function (l) {
+      return '<option value="' + l.id + '">' + l.nome + "</option>";
+    }).join("");
+  select.value = valorAtual;
+}
+
 // ---- Gerenciar papel de cada líder (admin) ----
 async function carregarPapeis() {
   if (!usuario || usuario.role !== "admin") {
     document.getElementById("cardGerenciarPapeis").hidden = true;
+    popularFiltroLider([]);
     return;
   }
   var todos;
@@ -688,6 +722,7 @@ async function carregarPapeis() {
   }
 
   var aprovados = todos.filter(function (l) { return l.status === "aprovado"; });
+  popularFiltroLider(aprovados);
   var card = document.getElementById("cardGerenciarPapeis");
   if (!aprovados.length) { card.hidden = true; return; }
   card.hidden = false;
