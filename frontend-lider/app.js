@@ -1,5 +1,5 @@
 // ---- Configuração da API (backend/ nesta pasta, "npm run dev") ----
-const API_BASE_URL = "http://localhost:3000/api";
+const API_BASE_URL = "https://informacoes.onrender.com/api";
 
 // ---- Estado local ----
 var token = localStorage.getItem("token") || null;
