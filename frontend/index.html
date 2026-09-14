@@ -78,6 +78,38 @@
       </div>
     </header>
 
+    <div id="secaoAgenda" hidden>
+      <h2 class="titulo-secao titulo-secao--espacada">Agenda de compromissos</h2>
+      <div class="grid-formularios">
+        <section class="card atraso-1">
+          <h2 class="card-titulo">Novo compromisso</h2>
+          <div class="erro" id="erroAgenda"></div>
+          <label>Nome</label>
+          <input type="text" id="agendaNome" placeholder="Nome da pessoa" autocomplete="off" />
+          <div class="grid2">
+            <div>
+              <label>WhatsApp</label>
+              <input type="tel" id="agendaWhatsapp" placeholder="(96) 99999-9999" autocomplete="off" />
+            </div>
+            <div>
+              <label>Data e hora</label>
+              <input type="datetime-local" id="agendaDataHora" />
+            </div>
+          </div>
+          <label>Local</label>
+          <input type="text" id="agendaLocal" placeholder="Onde vai ser" autocomplete="off" />
+          <label>Observação</label>
+          <input type="text" id="agendaObservacao" placeholder="Opcional" autocomplete="off" />
+          <button type="button" id="salvarAgendamento">Salvar compromisso</button>
+        </section>
+
+        <section class="card atraso-2">
+          <h2 id="tituloAgenda" class="card-titulo">Compromissos</h2>
+          <div id="listaAgenda"><p class="detalhe">Carregando...</p></div>
+        </section>
+      </div>
+    </div>
+
     <div id="secaoOperacional">
     <section class="stats-row" id="statsRow">
       <div class="stat">
@@ -185,38 +217,6 @@
         </table>
       </div>
     </section>
-    </div>
-
-    <div id="secaoAgenda" hidden>
-      <h2 class="titulo-secao titulo-secao--espacada">Agenda de compromissos</h2>
-      <div class="grid-formularios">
-        <section class="card atraso-1">
-          <h2 class="card-titulo">Novo compromisso</h2>
-          <div class="erro" id="erroAgenda"></div>
-          <label>Nome</label>
-          <input type="text" id="agendaNome" placeholder="Nome da pessoa" autocomplete="off" />
-          <div class="grid2">
-            <div>
-              <label>WhatsApp</label>
-              <input type="tel" id="agendaWhatsapp" placeholder="(96) 99999-9999" autocomplete="off" />
-            </div>
-            <div>
-              <label>Data e hora</label>
-              <input type="datetime-local" id="agendaDataHora" />
-            </div>
-          </div>
-          <label>Local</label>
-          <input type="text" id="agendaLocal" placeholder="Onde vai ser" autocomplete="off" />
-          <label>Observação</label>
-          <input type="text" id="agendaObservacao" placeholder="Opcional" autocomplete="off" />
-          <button type="button" id="salvarAgendamento">Salvar compromisso</button>
-        </section>
-
-        <section class="card atraso-2">
-          <h2 id="tituloAgenda" class="card-titulo">Compromissos</h2>
-          <div id="listaAgenda"><p class="detalhe">Carregando...</p></div>
-        </section>
-      </div>
     </div>
 
     <footer class="rodape">Equipe Sandra Alcantara 20111 · Amapá</footer>
