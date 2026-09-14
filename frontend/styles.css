@@ -873,7 +873,21 @@ button:disabled {
   letter-spacing: 0.02em;
 }
 
-@media (max-width: 420px) {
+@media (max-width: 640px) {
+  body {
+    padding: 12px 12px 40px;
+  }
+  .card {
+    padding: 14px;
+    border-radius: 12px;
+  }
+  .card-titulo {
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+  .titulo-secao {
+    font-size: 15px;
+  }
   .grid2 {
     grid-template-columns: 1fr;
   }
@@ -881,18 +895,26 @@ button:disabled {
     width: 100%;
   }
   .hero {
-    height: 220px;
+    height: 190px;
+    border-radius: 14px;
   }
   .hero-conteudo h1 {
-    font-size: 20px;
+    font-size: 19px;
+  }
+  .hero-conteudo p {
+    font-size: 12px;
   }
   .stats-row {
-    gap: 8px;
+    gap: 6px;
   }
   .stat {
-    padding: 10px 6px;
+    padding: 8px 4px;
+    border-radius: 10px;
   }
   .stat-valor {
-    font-size: 18px;
+    font-size: 17px;
+  }
+  .stat-label {
+    font-size: 9.5px;
   }
 }
