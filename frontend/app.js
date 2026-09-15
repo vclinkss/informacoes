@@ -1019,39 +1019,62 @@ function renderCardAgendaEdicao(a) {
   );
 }
 
+var agendaModalAberto = false;
+var LIMITE_AGENDA_RESUMO = 3;
+
+function renderAgendaItem(a, vTudo) {
+  if (editandoAgendaId === a.id) return renderCardAgendaEdicao(a);
+  var quem = vTudo ? '<p class="detalhe">' + ICONE_USERS + "Cadastrado por " + a.liderNome + "</p>" : "";
+  var dataStr = formatarDataHora(a.dataHora);
+  var linkWhatsAgenda = waLink(a.whatsapp);
+  var telefoneAgendaHtml = linkWhatsAgenda
+    ? '<div class="rodape-acoes rodape-acoes--rotas">' +
+        '<a class="botao-pequeno botao-rota" target="_blank" rel="noopener" href="' + linkWhatsAgenda + '">' + ICONE_PHONE + a.whatsapp + "</a>" +
+      "</div>"
+    : "";
+  return (
+    '<div class="agendamento-item" data-agenda-id="' + a.id + '">' +
+      '<p class="nome">' + (a.nome || "(sem nome)") + "</p>" +
+      (a.local ? '<p class="detalhe">' + ICONE_PIN + a.local + "</p>" : "") +
+      '<p class="detalhe">' + ICONE_CALENDARIO + (dataStr || "Sem data definida") + "</p>" +
+      (a.observacao ? '<p class="detalhe">Obs: ' + a.observacao + "</p>" : "") +
+      quem +
+      telefoneAgendaHtml +
+      '<div class="rodape-acoes">' +
+        '<button type="button" class="botao-pequeno btnEditarAgenda" data-id="' + a.id + '">Editar</button>' +
+        '<button type="button" class="botao-pequeno botao-rejeitar btnExcluirAgenda" data-id="' + a.id + '">Excluir</button>' +
+      "</div>" +
+    "</div>"
+  );
+}
+
 function renderAgenda() {
   var lista = document.getElementById("listaAgenda");
+  var btnVerMais = document.getElementById("btnVerMaisAgenda");
   if (!agendamentos.length) {
     lista.innerHTML = '<p class="detalhe">Nenhum compromisso ainda.</p>';
+    btnVerMais.hidden = true;
+    document.getElementById("modalAgendaCompleta").hidden = true;
+    agendaModalAberto = false;
     return;
   }
   var vTudo = usuario && (usuario.role === "admin" || usuario.role === "agenda");
 
-  lista.innerHTML = agendamentos.map(function (a) {
-    if (editandoAgendaId === a.id) return renderCardAgendaEdicao(a);
-    var quem = vTudo ? '<p class="detalhe">' + ICONE_USERS + "Cadastrado por " + a.liderNome + "</p>" : "";
-    var dataStr = formatarDataHora(a.dataHora);
-    var linkWhatsAgenda = waLink(a.whatsapp);
-    var telefoneAgendaHtml = linkWhatsAgenda
-      ? '<div class="rodape-acoes rodape-acoes--rotas">' +
-          '<a class="botao-pequeno botao-rota" target="_blank" rel="noopener" href="' + linkWhatsAgenda + '">' + ICONE_PHONE + a.whatsapp + "</a>" +
-        "</div>"
-      : "";
-    return (
-      '<div class="agendamento-item" data-agenda-id="' + a.id + '">' +
-        '<p class="nome">' + (a.nome || "(sem nome)") + "</p>" +
-        (a.local ? '<p class="detalhe">' + ICONE_PIN + a.local + "</p>" : "") +
-        '<p class="detalhe">' + ICONE_CALENDARIO + (dataStr || "Sem data definida") + "</p>" +
-        (a.observacao ? '<p class="detalhe">Obs: ' + a.observacao + "</p>" : "") +
-        quem +
-        telefoneAgendaHtml +
-        '<div class="rodape-acoes">' +
-          '<button type="button" class="botao-pequeno btnEditarAgenda" data-id="' + a.id + '">Editar</button>' +
-          '<button type="button" class="botao-pequeno botao-rejeitar btnExcluirAgenda" data-id="' + a.id + '">Excluir</button>' +
-        "</div>" +
-      "</div>"
-    );
+  lista.innerHTML = agendamentos.slice(0, LIMITE_AGENDA_RESUMO).map(function (a) {
+    return renderAgendaItem(a, vTudo);
   }).join("");
+
+  var restantes = agendamentos.length - LIMITE_AGENDA_RESUMO;
+  btnVerMais.hidden = restantes <= 0;
+  btnVerMais.textContent = "Ver mais (" + restantes + ")";
+
+  var modal = document.getElementById("modalAgendaCompleta");
+  modal.hidden = !agendaModalAberto;
+  if (agendaModalAberto) {
+    document.getElementById("listaAgendaCompleta").innerHTML = agendamentos.map(function (a) {
+      return renderAgendaItem(a, vTudo);
+    }).join("");
+  }
 
   document.querySelectorAll(".btnEditarAgenda").forEach(function (el) {
     el.addEventListener("click", function () { editandoAgendaId = parseInt(el.dataset.id); renderAgenda(); });
@@ -1099,6 +1122,15 @@ function renderAgenda() {
     });
   });
 }
+
+document.getElementById("btnVerMaisAgenda").addEventListener("click", function () {
+  agendaModalAberto = true;
+  renderAgenda();
+});
+document.getElementById("btnFecharModalAgenda").addEventListener("click", function () {
+  agendaModalAberto = false;
+  renderAgenda();
+});
 
 document.getElementById("salvarAgendamento").addEventListener("click", async function () {
   var campos = ["agendaNome", "agendaWhatsapp", "agendaDataHora", "agendaLocal"];

@@ -709,6 +709,71 @@ button:disabled {
   margin-bottom: 0;
 }
 
+.botao-ver-mais {
+  width: 100%;
+  margin-top: 4px;
+  background: none;
+  color: var(--verde);
+  border: 1px solid rgba(31, 110, 86, 0.3);
+  box-shadow: none;
+}
+
+.botao-ver-mais:hover {
+  background: #F0F8F4;
+  transform: none;
+  box-shadow: none;
+}
+
+.modal-agenda {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 61, 48, 0.45);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+}
+
+@media (min-width: 640px) {
+  .modal-agenda {
+    align-items: center;
+    padding: 20px;
+  }
+}
+
+.modal-agenda-conteudo {
+  background: #fff;
+  width: 100%;
+  max-width: 640px;
+  max-height: 85vh;
+  overflow-y: auto;
+  border-radius: 18px 18px 0 0;
+  padding: 18px;
+  animation: entrada 0.2s ease both;
+}
+
+@media (min-width: 640px) {
+  .modal-agenda-conteudo {
+    border-radius: 18px;
+  }
+}
+
+.modal-agenda-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  padding-bottom: 6px;
+}
+
+.modal-agenda-cabecalho .card-titulo {
+  margin: 0;
+}
+
 .agendamento-item {
   background: var(--superficie);
   border: 1px solid rgba(31, 110, 86, 0.12);
