@@ -363,8 +363,16 @@ async function renderStats() {
 
 var editandoId = null;
 
+// Escapa qualquer texto vindo de cadastro (nome, endereço, observação etc.) antes de
+// colocar na página, pra ninguém conseguir injetar HTML/script digitando algo malicioso
+// num campo (ex.: nome de contato) — vale tanto dentro de texto quanto de atributo="".
 function escaparAtributo(valor) {
-  return (valor || "").replace(/"/g, "&quot;");
+  return String(valor == null ? "" : valor)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 var editBairroGeoEscolhido = null;
@@ -373,11 +381,11 @@ var editVotacaoGeoEscolhido = null;
 function renderCardEdicao(c) {
   var opcoesBairro = '<option value="">Selecione o bairro...</option>' +
     Object.keys(bairrosDisponiveis).sort().map(function (nome) {
-      return '<option value="' + escaparAtributo(nome) + '"' + (nome === c.bairro ? " selected" : "") + ">" + nome + "</option>";
+      return '<option value="' + escaparAtributo(nome) + '"' + (nome === c.bairro ? " selected" : "") + ">" + escaparAtributo(nome) + "</option>";
     }).join("");
   // Se o bairro atual do contato não estiver na lista confirmada, mostra ele mesmo assim (não perde o dado).
   if (!bairrosDisponiveis[c.bairro]) {
-    opcoesBairro += '<option value="' + escaparAtributo(c.bairro) + '" selected>' + c.bairro + " (não confirmado)</option>";
+    opcoesBairro += '<option value="' + escaparAtributo(c.bairro) + '" selected>' + escaparAtributo(c.bairro) + " (não confirmado)</option>";
   }
 
   return (
@@ -446,8 +454,8 @@ function renderLista() {
     var atraso = Math.min(idx * 0.05, 0.5);
     var dataStr = formatarDataCadastro(c.dataCadastro);
     var linhaLider = mostrarLiderNaLinha
-      ? '<p class="detalhe">' + ICONE_USERS + 'Líder: ' + c.lider + " · Vota em " + c.votacao + "</p>"
-      : '<p class="detalhe">' + ICONE_USERS + "Vota em " + c.votacao + "</p>";
+      ? '<p class="detalhe">' + ICONE_USERS + 'Líder: ' + escaparAtributo(c.lider) + " · Vota em " + escaparAtributo(c.votacao) + "</p>"
+      : '<p class="detalhe">' + ICONE_USERS + "Vota em " + escaparAtributo(c.votacao) + "</p>";
     var linhaData = dataStr ? '<p class="detalhe detalhe--data">Cadastrado em ' + dataStr + "</p>" : "";
 
     var rodapeEdicao = somenteLeitura
@@ -468,16 +476,16 @@ function renderLista() {
 
     var linkWhats = waLink(c.whatsapp);
     var telefoneHtml = linkWhats
-      ? '<a class="whatsapp-link" href="' + linkWhats + '" target="_blank" rel="noopener">' + ICONE_PHONE + c.whatsapp + "</a>"
+      ? '<a class="whatsapp-link" href="' + linkWhats + '" target="_blank" rel="noopener">' + ICONE_PHONE + escaparAtributo(c.whatsapp) + "</a>"
       : "";
 
     return (
       '<div class="contato" data-contato-id="' + c.id + '" style="animation-delay:' + atraso + 's">' +
         '<div class="contato-topo">' +
-          '<div class="avatar">' + (c.nome.slice(0, 2).toUpperCase() || "?") + "</div>" +
+          '<div class="avatar">' + escaparAtributo(c.nome.slice(0, 2).toUpperCase() || "?") + "</div>" +
           '<div class="contato-info">' +
-            '<p class="nome">' + (c.nome || "(sem nome)") + ' <span class="status-pill ' + pillClasse + '">' + pillTexto + "</span></p>" +
-            '<p class="detalhe">' + ICONE_PIN + (c.endereco || "Endereço não informado") + " - " + (c.bairro || "Bairro não informado") + "</p>" +
+            '<p class="nome">' + escaparAtributo(c.nome || "(sem nome)") + ' <span class="status-pill ' + pillClasse + '">' + pillTexto + "</span></p>" +
+            '<p class="detalhe">' + ICONE_PIN + escaparAtributo(c.endereco || "Endereço não informado") + " - " + escaparAtributo(c.bairro || "Bairro não informado") + "</p>" +
             linhaLider +
             linhaData +
           "</div>" +
@@ -664,8 +672,8 @@ async function carregarPendentes() {
     return (
       '<div class="pendente-item">' +
         '<div class="pendente-info">' +
-          '<p class="nome">' + p.nome + "</p>" +
-          '<p class="detalhe">' + p.email + "</p>" +
+          '<p class="nome">' + escaparAtributo(p.nome) + "</p>" +
+          '<p class="detalhe">' + escaparAtributo(p.email) + "</p>" +
         "</div>" +
         '<div class="pendente-acoes">' +
           '<button type="button" class="btnAprovar" data-id="' + p.id + '">Aprovar</button>' +
@@ -710,7 +718,7 @@ function popularFiltroLider(aprovados) {
   var valorAtual = select.value;
   select.innerHTML = '<option value="">Todos os líderes</option>' +
     aprovados.map(function (l) {
-      return '<option value="' + l.id + '">' + l.nome + "</option>";
+      return '<option value="' + l.id + '">' + escaparAtributo(l.nome) + "</option>";
     }).join("");
   select.value = valorAtual;
 }
@@ -740,8 +748,8 @@ async function carregarPapeis() {
     return (
       '<div class="papel-item">' +
         '<div>' +
-          '<p class="nome">' + l.nome + (l.id === usuario.id ? " (você)" : "") + "</p>" +
-          '<p class="detalhe">' + l.email + "</p>" +
+          '<p class="nome">' + escaparAtributo(l.nome) + (l.id === usuario.id ? " (você)" : "") + "</p>" +
+          '<p class="detalhe">' + escaparAtributo(l.email) + "</p>" +
         "</div>" +
         '<select class="selectPapel" data-id="' + l.id + '" ' + (l.id === usuario.id ? "disabled" : "") + '>' +
           Object.keys(rotulos).map(function (r) {
@@ -794,7 +802,7 @@ async function carregarLogistica() {
 
 function popupComCorrecao(titulo, nome, tipo) {
   return (
-    '<div class="pin-popup"><strong>' + titulo + "</strong><br>" + nome +
+    '<div class="pin-popup"><strong>' + escaparAtributo(titulo) + "</strong><br>" + escaparAtributo(nome) +
     '<br><button type="button" class="botao-pequeno btnCorrigirPopup" data-nome="' + escaparAtributo(nome) + '" data-tipo="' + tipo + '">Corrigir localização</button></div>'
   );
 }
@@ -824,7 +832,7 @@ function renderLogistica() {
       "Não encontrei automaticamente no mapa: " +
       dados.naoLocalizados.map(function (item) {
         return (
-          '<span class="nao-localizado">' + item.nome +
+          '<span class="nao-localizado">' + escaparAtributo(item.nome) +
           ' <button type="button" class="botao-pequeno btnCorrigirLocal" data-nome="' + escaparAtributo(item.nome) + '" data-tipo="' + item.tipo + '">Corrigir no mapa</button></span>'
         );
       }).join(", ");
@@ -839,7 +847,7 @@ function renderLogistica() {
   document.getElementById("corpoTabelaLogistica").innerHTML = rotas.map(function (r) {
     var carros = Math.ceil(r.total / capacidade);
     return (
-      "<tr><td>" + r.bairro + "</td><td>" + r.localVotacao + "</td><td>" + r.total + "</td><td>" + carros + "</td></tr>"
+      "<tr><td>" + escaparAtributo(r.bairro) + "</td><td>" + escaparAtributo(r.localVotacao) + "</td><td>" + r.total + "</td><td>" + carros + "</td></tr>"
     );
   }).join("") || '<tr><td colspan="4" class="detalhe">Sem dados ainda.</td></tr>';
 
@@ -885,8 +893,8 @@ function renderLogistica() {
     var pillTexto = c.liguei ? "Ligou" : "Pendente";
     L.circleMarker([c.lat, c.lng], { radius: 5, color: "#0F3D30", fillColor: "#7F77DD", fillOpacity: 0.9, weight: 1.5 })
       .bindPopup(
-        '<div class="pin-popup"><strong>' + c.nome + "</strong><br>" +
-        "Bairro: " + c.bairro + "<br>Vota em: " + c.localVotacao + "<br>" + pillTexto + "</div>"
+        '<div class="pin-popup"><strong>' + escaparAtributo(c.nome) + "</strong><br>" +
+        "Bairro: " + escaparAtributo(c.bairro) + "<br>Vota em: " + escaparAtributo(c.localVotacao) + "<br>" + pillTexto + "</div>"
       )
       .addTo(camadaContatos);
 
@@ -899,7 +907,7 @@ function renderLogistica() {
         opacity: 0.6,
         dashArray: "4,5",
       })
-        .bindPopup('<div class="pin-popup"><strong>' + c.nome + "</strong><br>até " + c.localVotacao + "</div>")
+        .bindPopup('<div class="pin-popup"><strong>' + escaparAtributo(c.nome) + "</strong><br>até " + escaparAtributo(c.localVotacao) + "</div>")
         .addTo(camadaContatos);
     }
   });
@@ -950,7 +958,7 @@ async function carregarSugestoes() {
     var valorAtual = selectBairro.value;
     selectBairro.innerHTML = '<option value="">Selecione o bairro...</option>' +
       bairros.slice().sort(function (a, b) { return a.nome.localeCompare(b.nome); }).map(function (p) {
-        return '<option value="' + escaparAtributo(p.nome) + '">' + p.nome + "</option>";
+        return '<option value="' + escaparAtributo(p.nome) + '">' + escaparAtributo(p.nome) + "</option>";
       }).join("");
     if (bairrosDisponiveis[valorAtual]) selectBairro.value = valorAtual;
   } catch (e) { /* lista de bairros é só um bônus, não trava o app se falhar */ }
@@ -1026,12 +1034,12 @@ var LIMITE_AGENDA_RESUMO = 3;
 
 function renderAgendaItem(a, vTudo) {
   if (editandoAgendaId === a.id) return renderCardAgendaEdicao(a);
-  var quem = vTudo ? '<p class="detalhe">' + ICONE_USERS + "Cadastrado por " + a.liderNome + "</p>" : "";
+  var quem = vTudo ? '<p class="detalhe">' + ICONE_USERS + "Cadastrado por " + escaparAtributo(a.liderNome) + "</p>" : "";
   var dataStr = formatarDataHora(a.dataHora);
   var linkWhatsAgenda = waLink(a.whatsapp);
   var telefoneAgendaHtml = linkWhatsAgenda
     ? '<div class="rodape-acoes rodape-acoes--rotas">' +
-        '<a class="botao-pequeno botao-rota" target="_blank" rel="noopener" href="' + linkWhatsAgenda + '">' + ICONE_PHONE + a.whatsapp + "</a>" +
+        '<a class="botao-pequeno botao-rota" target="_blank" rel="noopener" href="' + linkWhatsAgenda + '">' + ICONE_PHONE + escaparAtributo(a.whatsapp) + "</a>" +
       "</div>"
     : "";
   var botaoConcluir = a.concluido
@@ -1039,10 +1047,10 @@ function renderAgendaItem(a, vTudo) {
     : '<button type="button" class="botao-pequeno btnConcluirAgenda" data-id="' + a.id + '">Visita concluída</button>';
   return (
     '<div class="agendamento-item" data-agenda-id="' + a.id + '">' +
-      '<p class="nome">' + (a.nome || "(sem nome)") + "</p>" +
-      (a.local ? '<p class="detalhe">' + ICONE_PIN + a.local + "</p>" : "") +
+      '<p class="nome">' + escaparAtributo(a.nome || "(sem nome)") + "</p>" +
+      (a.local ? '<p class="detalhe">' + ICONE_PIN + escaparAtributo(a.local) + "</p>" : "") +
       '<p class="detalhe">' + ICONE_CALENDARIO + (dataStr || "Sem data definida") + "</p>" +
-      (a.observacao ? '<p class="detalhe">Obs: ' + a.observacao + "</p>" : "") +
+      (a.observacao ? '<p class="detalhe">Obs: ' + escaparAtributo(a.observacao) + "</p>" : "") +
       quem +
       telefoneAgendaHtml +
       '<div class="rodape-acoes">' +
