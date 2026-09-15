@@ -18,6 +18,7 @@ type AgendamentoRow = {
   dataHora: Date | null;
   local: string;
   observacao: string | null;
+  concluido: boolean | null;
   criadoEm: Date | null;
 };
 
@@ -31,6 +32,7 @@ function toDomain(row: AgendamentoRow): Agendamento {
     dataHora: row.dataHora,
     local: row.local,
     observacao: row.observacao,
+    concluido: row.concluido ?? false,
     criadoEm: row.criadoEm ?? undefined,
   });
 }
@@ -44,6 +46,7 @@ const agendamentoComLider = {
   dataHora: agendamentoTable.dataHora,
   local: agendamentoTable.local,
   observacao: agendamentoTable.observacao,
+  concluido: agendamentoTable.concluido,
   criadoEm: agendamentoTable.criadoEm,
 };
 
@@ -92,6 +95,7 @@ export class DrizzleAgendamentoRepository implements IAgendamentoRepository {
         dataHora: dados.dataHora,
         local: dados.local,
         observacao: dados.observacao,
+        concluido: dados.concluido,
       })
       .where(condicao)
       .returning();

@@ -21,6 +21,7 @@ const bodySchema = z.object({
   ),
   local: z.string().trim().optional(),
   observacao: z.string().trim().max(500).optional(),
+  concluido: z.boolean().optional(),
 });
 
 export class UpdateAgendamentoController {

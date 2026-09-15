@@ -63,11 +63,15 @@ create table if not exists agendamento (
     data_hora     timestamptz,
     local         varchar(255) not null,
     observacao    varchar(500),
+    concluido     boolean default false,
     criado_em     timestamptz default now()
 );
 
 -- Cadastro livre: nenhum campo é obrigatório para salvar um compromisso.
 alter table agendamento alter column data_hora drop not null;
+
+-- Marca se a visita já foi feita (some da lista principal, vai pra aba "concluídas").
+alter table agendamento add column if not exists concluido boolean default false;
 
 create index if not exists idx_agendamento_lider on agendamento(lider_id);
 create index if not exists idx_agendamento_data  on agendamento(data_hora);

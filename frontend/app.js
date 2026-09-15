@@ -1021,6 +1021,7 @@ function renderCardAgendaEdicao(a) {
 }
 
 var agendaModalAberto = false;
+var concluidasModalAberto = false;
 var LIMITE_AGENDA_RESUMO = 3;
 
 function renderAgendaItem(a, vTudo) {
@@ -1033,6 +1034,9 @@ function renderAgendaItem(a, vTudo) {
         '<a class="botao-pequeno botao-rota" target="_blank" rel="noopener" href="' + linkWhatsAgenda + '">' + ICONE_PHONE + a.whatsapp + "</a>" +
       "</div>"
     : "";
+  var botaoConcluir = a.concluido
+    ? '<button type="button" class="botao-pequeno btnReabrirAgenda" data-id="' + a.id + '">Reabrir</button>'
+    : '<button type="button" class="botao-pequeno btnConcluirAgenda" data-id="' + a.id + '">Visita concluída</button>';
   return (
     '<div class="agendamento-item" data-agenda-id="' + a.id + '">' +
       '<p class="nome">' + (a.nome || "(sem nome)") + "</p>" +
@@ -1042,6 +1046,7 @@ function renderAgendaItem(a, vTudo) {
       quem +
       telefoneAgendaHtml +
       '<div class="rodape-acoes">' +
+        botaoConcluir +
         '<button type="button" class="botao-pequeno btnEditarAgenda" data-id="' + a.id + '">Editar</button>' +
         '<button type="button" class="botao-pequeno botao-rejeitar btnExcluirAgenda" data-id="' + a.id + '">Excluir</button>' +
       "</div>" +
@@ -1052,29 +1057,43 @@ function renderAgendaItem(a, vTudo) {
 function renderAgenda() {
   var lista = document.getElementById("listaAgenda");
   var btnVerMais = document.getElementById("btnVerMaisAgenda");
-  if (!agendamentos.length) {
-    lista.innerHTML = '<p class="detalhe">Nenhum compromisso ainda.</p>';
+  var btnVerConcluidas = document.getElementById("btnVerConcluidasAgenda");
+  var ativos = agendamentos.filter(function (a) { return !a.concluido; });
+  var concluidos = agendamentos.filter(function (a) { return a.concluido; });
+
+  btnVerConcluidas.hidden = concluidos.length === 0;
+  btnVerConcluidas.textContent = "Visitas concluídas (" + concluidos.length + ")";
+
+  if (!ativos.length) {
+    lista.innerHTML = '<p class="detalhe">Nenhum compromisso em aberto.</p>';
     btnVerMais.hidden = true;
-    document.getElementById("modalAgendaCompleta").hidden = true;
-    agendaModalAberto = false;
-    return;
+  } else {
+    var vTudo = usuario && (usuario.role === "admin" || usuario.role === "agenda");
+    lista.innerHTML = ativos.slice(0, LIMITE_AGENDA_RESUMO).map(function (a) {
+      return renderAgendaItem(a, vTudo);
+    }).join("");
+
+    var restantes = ativos.length - LIMITE_AGENDA_RESUMO;
+    btnVerMais.hidden = restantes <= 0;
+    btnVerMais.textContent = "Ver mais (" + restantes + ")";
   }
-  var vTudo = usuario && (usuario.role === "admin" || usuario.role === "agenda");
 
-  lista.innerHTML = agendamentos.slice(0, LIMITE_AGENDA_RESUMO).map(function (a) {
-    return renderAgendaItem(a, vTudo);
-  }).join("");
-
-  var restantes = agendamentos.length - LIMITE_AGENDA_RESUMO;
-  btnVerMais.hidden = restantes <= 0;
-  btnVerMais.textContent = "Ver mais (" + restantes + ")";
+  var vTudoModal = usuario && (usuario.role === "admin" || usuario.role === "agenda");
 
   var modal = document.getElementById("modalAgendaCompleta");
   modal.hidden = !agendaModalAberto;
   if (agendaModalAberto) {
-    document.getElementById("listaAgendaCompleta").innerHTML = agendamentos.map(function (a) {
-      return renderAgendaItem(a, vTudo);
-    }).join("");
+    document.getElementById("listaAgendaCompleta").innerHTML = ativos.length
+      ? ativos.map(function (a) { return renderAgendaItem(a, vTudoModal); }).join("")
+      : '<p class="detalhe">Nenhum compromisso em aberto.</p>';
+  }
+
+  var modalConcluidas = document.getElementById("modalAgendaConcluidas");
+  modalConcluidas.hidden = !concluidasModalAberto;
+  if (concluidasModalAberto) {
+    document.getElementById("listaAgendaConcluidas").innerHTML = concluidos.length
+      ? concluidos.map(function (a) { return renderAgendaItem(a, vTudoModal); }).join("")
+      : '<p class="detalhe">Nenhuma visita concluída ainda.</p>';
   }
 
   document.querySelectorAll(".btnEditarAgenda").forEach(function (el) {
@@ -1107,6 +1126,32 @@ function renderAgenda() {
       }
     });
   });
+  document.querySelectorAll(".btnConcluirAgenda").forEach(function (el) {
+    el.addEventListener("click", async function () {
+      var id = parseInt(el.dataset.id);
+      el.disabled = true;
+      try {
+        await api("/agenda/" + id, { method: "PUT", body: JSON.stringify({ concluido: true }) });
+        await carregarAgenda();
+      } catch (e) {
+        mostrarErro("Erro ao marcar como concluída: " + e.message);
+        el.disabled = false;
+      }
+    });
+  });
+  document.querySelectorAll(".btnReabrirAgenda").forEach(function (el) {
+    el.addEventListener("click", async function () {
+      var id = parseInt(el.dataset.id);
+      el.disabled = true;
+      try {
+        await api("/agenda/" + id, { method: "PUT", body: JSON.stringify({ concluido: false }) });
+        await carregarAgenda();
+      } catch (e) {
+        mostrarErro("Erro ao reabrir: " + e.message);
+        el.disabled = false;
+      }
+    });
+  });
   document.querySelectorAll(".btnExcluirAgenda").forEach(function (el) {
     el.addEventListener("click", async function () {
       var id = parseInt(el.dataset.id);
@@ -1130,6 +1175,14 @@ document.getElementById("btnVerMaisAgenda").addEventListener("click", function (
 });
 document.getElementById("btnFecharModalAgenda").addEventListener("click", function () {
   agendaModalAberto = false;
+  renderAgenda();
+});
+document.getElementById("btnVerConcluidasAgenda").addEventListener("click", function () {
+  concluidasModalAberto = true;
+  renderAgenda();
+});
+document.getElementById("btnFecharModalConcluidas").addEventListener("click", function () {
+  concluidasModalAberto = false;
   renderAgenda();
 });
 

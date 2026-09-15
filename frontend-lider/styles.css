@@ -724,6 +724,16 @@ button:disabled {
   box-shadow: none;
 }
 
+@keyframes esmaecerFundo {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes subirTela {
+  from { transform: translateY(60px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
 .modal-agenda {
   position: fixed;
   inset: 0;
@@ -733,6 +743,7 @@ button:disabled {
   align-items: flex-end;
   justify-content: center;
   padding: 0;
+  animation: esmaecerFundo 0.2s ease both;
 }
 
 @media (min-width: 640px) {
@@ -750,7 +761,7 @@ button:disabled {
   overflow-y: auto;
   border-radius: 18px 18px 0 0;
   padding: 18px;
-  animation: entrada 0.2s ease both;
+  animation: subirTela 0.32s cubic-bezier(0.22, 0.9, 0.3, 1) both;
 }
 
 @media (min-width: 640px) {

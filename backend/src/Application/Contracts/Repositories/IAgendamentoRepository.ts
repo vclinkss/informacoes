@@ -11,6 +11,7 @@ export type AgendamentoEdicao = {
   dataHora?: Date | null;
   local?: string;
   observacao?: string | null;
+  concluido?: boolean;
 };
 
 export interface IAgendamentoRepository {

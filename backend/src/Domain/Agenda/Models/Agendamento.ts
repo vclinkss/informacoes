@@ -7,6 +7,7 @@ export type AgendamentoProps = {
   dataHora?: Date | null;
   local?: string;
   observacao?: string | null;
+  concluido?: boolean;
   criadoEm?: Date;
 };
 
@@ -19,6 +20,7 @@ export class Agendamento {
   readonly dataHora: Date | null;
   readonly local: string;
   readonly observacao: string | null;
+  readonly concluido: boolean;
   readonly criadoEm?: Date;
 
   constructor(props: AgendamentoProps) {
@@ -30,6 +32,7 @@ export class Agendamento {
     this.dataHora = props.dataHora ?? null;
     this.local = props.local ?? "";
     this.observacao = props.observacao ?? null;
+    this.concluido = props.concluido ?? false;
     this.criadoEm = props.criadoEm;
   }
 

@@ -1,4 +1,4 @@
-import { bigint, bigserial, pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
+import { bigint, bigserial, boolean, pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
 import { liderTable } from "./lideres";
 
 // Mapeia a tabela "agendamento", criada manualmente via banco/schema.sql no SQL Editor do Supabase.
@@ -12,5 +12,6 @@ export const agendamentoTable = pgTable("agendamento", {
   dataHora: timestamp("data_hora", { withTimezone: true }),
   local: varchar("local", { length: 255 }).notNull(),
   observacao: varchar("observacao", { length: 500 }),
+  concluido: boolean("concluido").default(false),
   criadoEm: timestamp("criado_em", { withTimezone: true }).defaultNow(),
 });
