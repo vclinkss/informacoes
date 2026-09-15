@@ -20,10 +20,10 @@ export class UpdateContato {
     const atualizado = await this.contatoRepository.update(input.id, input.dados, input.liderIdRestricao);
     if (!atualizado) throw new AppError("Contato não encontrado", 404);
 
-    if (input.bairroGeo) {
+    if (input.bairroGeo && input.dados.bairro) {
       await this.geoCacheRepository.salvar(input.dados.bairro, input.bairroGeo, "bairro");
     }
-    if (input.votacaoGeo) {
+    if (input.votacaoGeo && input.dados.localVotacao) {
       await this.geoCacheRepository.salvar(input.dados.localVotacao, input.votacaoGeo, "votacao");
     }
 

@@ -7,11 +7,11 @@ import { AuthenticatedRequest } from "../../Contracts/HttpRequest";
 const pontoSchema = z.object({ lat: z.number(), lng: z.number() }).optional();
 
 const schema = z.object({
-  nome: z.string().trim().min(1, "Informe o nome"),
-  endereco: z.string().trim().min(1, "Informe o endereço"),
-  bairro: z.string().trim().min(1, "Informe o bairro"),
-  whatsapp: z.string().trim().min(8, "Informe um WhatsApp válido"),
-  localVotacao: z.string().trim().min(1, "Informe o local de votação"),
+  nome: z.string().trim().optional(),
+  endereco: z.string().trim().optional(),
+  bairro: z.string().trim().optional(),
+  whatsapp: z.string().trim().optional(),
+  localVotacao: z.string().trim().optional(),
   bairroGeo: pontoSchema,
   votacaoGeo: pontoSchema,
   enderecoGeo: pontoSchema,

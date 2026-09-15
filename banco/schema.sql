@@ -60,11 +60,14 @@ create table if not exists agendamento (
     lider_id      bigint not null references lider(id) on delete cascade,
     nome          varchar(150) not null,
     whatsapp      varchar(20) not null,
-    data_hora     timestamptz not null,
+    data_hora     timestamptz,
     local         varchar(255) not null,
     observacao    varchar(500),
     criado_em     timestamptz default now()
 );
+
+-- Cadastro livre: nenhum campo é obrigatório para salvar um compromisso.
+alter table agendamento alter column data_hora drop not null;
 
 create index if not exists idx_agendamento_lider on agendamento(lider_id);
 create index if not exists idx_agendamento_data  on agendamento(data_hora);

@@ -7,11 +7,11 @@ export type PontoOpcional = { lat: number; lng: number } | undefined;
 export type CreateContatoInput = {
   liderId: number;
   liderNome: string;
-  nome: string;
-  endereco: string;
-  bairro: string;
-  whatsapp: string;
-  localVotacao: string;
+  nome?: string;
+  endereco?: string;
+  bairro?: string;
+  whatsapp?: string;
+  localVotacao?: string;
   /** Se a pessoa escolheu o bairro/local numa sugestão de busca, já vem com a localização exata. */
   bairroGeo?: PontoOpcional;
   votacaoGeo?: PontoOpcional;
@@ -29,13 +29,13 @@ export class CreateContato {
     const contato = new Contato({
       liderId: input.liderId,
       liderNome: input.liderNome,
-      nome: input.nome.trim(),
-      endereco: input.endereco.trim(),
+      nome: input.nome?.trim() || "",
+      endereco: input.endereco?.trim() || "",
       enderecoLat: input.enderecoGeo?.lat,
       enderecoLng: input.enderecoGeo?.lng,
-      bairro: input.bairro.trim(),
-      whatsapp: input.whatsapp.trim(),
-      localVotacao: input.localVotacao.trim(),
+      bairro: input.bairro?.trim() || "",
+      whatsapp: input.whatsapp?.trim() || "",
+      localVotacao: input.localVotacao?.trim() || "",
     });
 
     const criado = await this.contatoRepository.create(contato);

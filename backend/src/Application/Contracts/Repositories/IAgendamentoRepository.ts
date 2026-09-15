@@ -6,10 +6,10 @@ export type AgendamentoFiltro = {
 };
 
 export type AgendamentoEdicao = {
-  nome: string;
-  whatsapp: string;
-  dataHora: Date;
-  local: string;
+  nome?: string;
+  whatsapp?: string;
+  dataHora?: Date | null;
+  local?: string;
   observacao?: string | null;
 };
 

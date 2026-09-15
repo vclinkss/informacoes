@@ -15,7 +15,8 @@ var ICONE_PHONE = '<svg class="icone" width="13" height="13" viewBox="0 0 24 24"
 var ICONE_CALENDARIO = '<svg class="icone" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path></svg>';
 
 function waLink(numero) {
-  var digits = numero.replace(/\D/g, "");
+  var digits = (numero || "").replace(/\D/g, "");
+  if (!digits) return null;
   if (digits.indexOf("55") !== 0) digits = "55" + digits;
   return "https://wa.me/" + digits;
 }
@@ -247,17 +248,14 @@ document.getElementById("bairro").addEventListener("change", function () {
 document.getElementById("salvar").addEventListener("click", async function () {
   var campos = ["nome", "endereco", "bairro", "whatsapp", "votacao"];
   var valores = {};
-  var vazio = false;
   campos.forEach(function (id) {
     valores[id] = document.getElementById(id).value.trim();
-    if (!valores[id]) vazio = true;
   });
-  if (vazio) { mostrarErro("Preencha todos os campos do contato."); return; }
 
   await aguardarBusca("votacao"); // se a busca do local de votação ainda tava rodando, espera terminar
 
-  if (!votacaoGeoEscolhido) {
-    mostrarErro('Escolha o "Local de votação" a partir da lista de sugestões que aparece ao sair do campo — é obrigatório pra garantir o local exato.');
+  if (valores.votacao && !votacaoGeoEscolhido) {
+    mostrarErro('Escolha o "Local de votação" a partir da lista de sugestões que aparece ao sair do campo — assim o local fica exato. Ou deixe o campo em branco.');
     return;
   }
 
@@ -467,17 +465,22 @@ function renderLista() {
           '<button type="button" class="botao-pequeno botao-rejeitar btnExcluir" data-id="' + c.id + '">Excluir</button>' +
         "</div>";
 
+    var linkWhats = waLink(c.whatsapp);
+    var telefoneHtml = linkWhats
+      ? '<a class="whatsapp-link" href="' + linkWhats + '" target="_blank" rel="noopener">' + ICONE_PHONE + c.whatsapp + "</a>"
+      : "";
+
     return (
       '<div class="contato" data-contato-id="' + c.id + '" style="animation-delay:' + atraso + 's">' +
         '<div class="contato-topo">' +
-          '<div class="avatar">' + c.nome.slice(0, 2).toUpperCase() + "</div>" +
+          '<div class="avatar">' + (c.nome.slice(0, 2).toUpperCase() || "?") + "</div>" +
           '<div class="contato-info">' +
-            '<p class="nome">' + c.nome + ' <span class="status-pill ' + pillClasse + '">' + pillTexto + "</span></p>" +
-            '<p class="detalhe">' + ICONE_PIN + c.endereco + " - " + c.bairro + "</p>" +
+            '<p class="nome">' + (c.nome || "(sem nome)") + ' <span class="status-pill ' + pillClasse + '">' + pillTexto + "</span></p>" +
+            '<p class="detalhe">' + ICONE_PIN + (c.endereco || "Endereço não informado") + " - " + (c.bairro || "Bairro não informado") + "</p>" +
             linhaLider +
             linhaData +
           "</div>" +
-          '<a class="whatsapp-link" href="' + waLink(c.whatsapp) + '" target="_blank" rel="noopener">' + ICONE_PHONE + c.whatsapp + "</a>" +
+          telefoneHtml +
         "</div>" +
         rodapeEdicao +
         '<div class="rodape-acoes rodape-acoes--rotas">' +
@@ -524,10 +527,6 @@ function renderLista() {
         whatsapp: card.querySelector(".editWhatsapp").value.trim(),
         localVotacao: card.querySelector("#editVotacaoInput").value.trim(),
       };
-      if (!dados.nome || !dados.endereco || !dados.bairro || !dados.whatsapp || !dados.localVotacao) {
-        mostrarErro("Preencha todos os campos pra salvar a edição.");
-        return;
-      }
       await aguardarBusca("editVotacaoInput");
       el.disabled = true;
       try {
@@ -961,12 +960,22 @@ var agendamentos = [];
 var editandoAgendaId = null;
 
 function formatarDataHora(iso) {
+  if (!iso) return "";
   var d = new Date(iso);
-  if (isNaN(d.getTime())) return iso;
+  if (isNaN(d.getTime())) return "";
   return d.toLocaleDateString("pt-BR") + " às " + d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 }
 
+function paraISOComOffset(valorDatetimeLocal) {
+  // O <input type="datetime-local"> não carrega fuso horário; sem isso o servidor
+  // (que roda em UTC) interpretava a hora digitada como se já fosse UTC, adiantando
+  // 3h. Amapá/Brasil não tem horário de verão, então o offset -03:00 é sempre fixo.
+  if (!valorDatetimeLocal) return valorDatetimeLocal;
+  return valorDatetimeLocal.length === 16 ? valorDatetimeLocal + ":00-03:00" : valorDatetimeLocal + "-03:00";
+}
+
 function paraInputDatetimeLocal(iso) {
+  if (!iso) return "";
   var d = new Date(iso);
   if (isNaN(d.getTime())) return "";
   var pad = function (n) { return String(n).padStart(2, "0"); };
@@ -1021,16 +1030,21 @@ function renderAgenda() {
   lista.innerHTML = agendamentos.map(function (a) {
     if (editandoAgendaId === a.id) return renderCardAgendaEdicao(a);
     var quem = vTudo ? '<p class="detalhe">' + ICONE_USERS + "Cadastrado por " + a.liderNome + "</p>" : "";
+    var dataStr = formatarDataHora(a.dataHora);
+    var linkWhatsAgenda = waLink(a.whatsapp);
+    var telefoneAgendaHtml = linkWhatsAgenda
+      ? '<div class="rodape-acoes rodape-acoes--rotas">' +
+          '<a class="botao-pequeno botao-rota" target="_blank" rel="noopener" href="' + linkWhatsAgenda + '">' + ICONE_PHONE + a.whatsapp + "</a>" +
+        "</div>"
+      : "";
     return (
       '<div class="agendamento-item" data-agenda-id="' + a.id + '">' +
-        '<p class="nome">' + a.nome + "</p>" +
-        '<p class="detalhe">' + ICONE_PIN + a.local + "</p>" +
-        '<p class="detalhe">' + ICONE_CALENDARIO + formatarDataHora(a.dataHora) + "</p>" +
+        '<p class="nome">' + (a.nome || "(sem nome)") + "</p>" +
+        (a.local ? '<p class="detalhe">' + ICONE_PIN + a.local + "</p>" : "") +
+        '<p class="detalhe">' + ICONE_CALENDARIO + (dataStr || "Sem data definida") + "</p>" +
         (a.observacao ? '<p class="detalhe">Obs: ' + a.observacao + "</p>" : "") +
         quem +
-        '<div class="rodape-acoes rodape-acoes--rotas">' +
-          '<a class="botao-pequeno botao-rota" target="_blank" rel="noopener" href="' + waLink(a.whatsapp) + '">' + ICONE_PHONE + a.whatsapp + "</a>" +
-        "</div>" +
+        telefoneAgendaHtml +
         '<div class="rodape-acoes">' +
           '<button type="button" class="botao-pequeno btnEditarAgenda" data-id="' + a.id + '">Editar</button>' +
           '<button type="button" class="botao-pequeno botao-rejeitar btnExcluirAgenda" data-id="' + a.id + '">Excluir</button>' +
@@ -1052,14 +1066,10 @@ function renderAgenda() {
       var dados = {
         nome: card.querySelector(".editAgendaNome").value.trim(),
         whatsapp: card.querySelector(".editAgendaWhatsapp").value.trim(),
-        dataHora: card.querySelector(".editAgendaDataHora").value,
+        dataHora: paraISOComOffset(card.querySelector(".editAgendaDataHora").value),
         local: card.querySelector(".editAgendaLocal").value.trim(),
         observacao: card.querySelector(".editAgendaObservacao").value.trim(),
       };
-      if (!dados.nome || !dados.whatsapp || !dados.dataHora || !dados.local) {
-        mostrarErro("Preencha todos os campos do compromisso.");
-        return;
-      }
       el.disabled = true;
       try {
         await api("/agenda/" + id, { method: "PUT", body: JSON.stringify(dados) });
@@ -1093,12 +1103,9 @@ function renderAgenda() {
 document.getElementById("salvarAgendamento").addEventListener("click", async function () {
   var campos = ["agendaNome", "agendaWhatsapp", "agendaDataHora", "agendaLocal"];
   var valores = {};
-  var vazio = false;
   campos.forEach(function (id) {
     valores[id] = document.getElementById(id).value.trim();
-    if (!valores[id]) vazio = true;
   });
-  if (vazio) { mostrarErroEm("erroAgenda", "Preencha nome, WhatsApp, data/hora e local."); return; }
 
   var botao = this;
   botao.disabled = true;
@@ -1108,7 +1115,7 @@ document.getElementById("salvarAgendamento").addEventListener("click", async fun
       body: JSON.stringify({
         nome: valores.agendaNome,
         whatsapp: valores.agendaWhatsapp,
-        dataHora: valores.agendaDataHora,
+        dataHora: paraISOComOffset(valores.agendaDataHora),
         local: valores.agendaLocal,
         observacao: document.getElementById("agendaObservacao").value.trim(),
       }),

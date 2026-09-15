@@ -4,10 +4,10 @@ import { Agendamento } from "../../../../Domain/Agenda/Models/Agendamento";
 export type CreateAgendamentoInput = {
   liderId: number;
   liderNome: string;
-  nome: string;
-  whatsapp: string;
-  dataHora: Date;
-  local: string;
+  nome?: string;
+  whatsapp?: string;
+  dataHora?: Date | null;
+  local?: string;
   observacao?: string | null;
 };
 
@@ -18,10 +18,10 @@ export class CreateAgendamento {
     const agendamento = new Agendamento({
       liderId: input.liderId,
       liderNome: input.liderNome,
-      nome: input.nome.trim(),
-      whatsapp: input.whatsapp.trim(),
-      dataHora: input.dataHora,
-      local: input.local.trim(),
+      nome: input.nome?.trim() || "",
+      whatsapp: input.whatsapp?.trim() || "",
+      dataHora: input.dataHora ?? null,
+      local: input.local?.trim() || "",
       observacao: input.observacao?.trim() || null,
     });
 

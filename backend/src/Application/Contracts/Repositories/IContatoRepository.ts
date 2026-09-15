@@ -11,13 +11,13 @@ export type ContagemBairro = { bairro: string; total: number };
 export type ContagemLocalVotacao = { localVotacao: string; total: number };
 
 export type ContatoEdicao = {
-  nome: string;
-  endereco: string;
+  nome?: string;
+  endereco?: string;
   enderecoLat?: number | null;
   enderecoLng?: number | null;
-  bairro: string;
-  whatsapp: string;
-  localVotacao: string;
+  bairro?: string;
+  whatsapp?: string;
+  localVotacao?: string;
 };
 
 export interface IContatoRepository {

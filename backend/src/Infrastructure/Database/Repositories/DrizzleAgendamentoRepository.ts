@@ -15,7 +15,7 @@ type AgendamentoRow = {
   liderNome: string;
   nome: string;
   whatsapp: string;
-  dataHora: Date;
+  dataHora: Date | null;
   local: string;
   observacao: string | null;
   criadoEm: Date | null;

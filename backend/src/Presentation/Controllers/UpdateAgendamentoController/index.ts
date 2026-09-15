@@ -13,10 +13,13 @@ const paramsSchema = z.object({
 });
 
 const bodySchema = z.object({
-  nome: z.string().trim().min(1, "Informe o nome"),
-  whatsapp: z.string().trim().min(8, "Informe um WhatsApp válido"),
-  dataHora: z.coerce.date({ message: "Informe data e hora válidas" }),
-  local: z.string().trim().min(1, "Informe o local"),
+  nome: z.string().trim().optional(),
+  whatsapp: z.string().trim().optional(),
+  dataHora: z.preprocess(
+    (v) => (v === "" || v === null || v === undefined ? undefined : v),
+    z.coerce.date({ message: "Data e hora inválidas" }).optional()
+  ),
+  local: z.string().trim().optional(),
   observacao: z.string().trim().max(500).optional(),
 });
 
