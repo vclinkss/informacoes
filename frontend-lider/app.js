@@ -260,11 +260,6 @@ document.getElementById("salvar").addEventListener("click", async function () {
 
   await aguardarBusca("votacao"); // se a busca do local de votação ainda tava rodando, espera terminar
 
-  if (valores.votacao && !votacaoGeoEscolhido) {
-    mostrarErro('Escolha o "Local de votação" a partir da lista de sugestões que aparece ao sair do campo — assim o local fica exato. Ou deixe o campo em branco.');
-    return;
-  }
-
   var botao = this;
   botao.disabled = true;
   try {
