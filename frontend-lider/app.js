@@ -176,6 +176,7 @@ function encurtarNome(nomeCompleto) {
 }
 
 var buscasPendentes = {};
+var debounceBusca = {};
 
 async function aguardarBusca(inputId) {
   if (buscasPendentes[inputId]) {
@@ -193,9 +194,14 @@ function configurarBuscaEndereco(inputId, caixaId, aoEscolher, aoDigitarLivre, s
     aoDigitarLivre();
     input.classList.remove("campo-confirmado");
     esconder();
+    clearTimeout(debounceBusca[inputId]);
+    debounceBusca[inputId] = setTimeout(function () {
+      buscasPendentes[inputId] = executarBusca();
+    }, 450);
   });
 
   input.addEventListener("blur", function () {
+    clearTimeout(debounceBusca[inputId]);
     buscasPendentes[inputId] = executarBusca();
   });
 
