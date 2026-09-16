@@ -24,6 +24,7 @@ type ContatoRow = {
   localVotacao: string;
   liguei: boolean | null;
   observacao: string | null;
+  precisaCarona: boolean | null;
   dataCadastro: Date | null;
 };
 
@@ -41,6 +42,7 @@ function toDomain(row: ContatoRow): Contato {
     localVotacao: row.localVotacao,
     liguei: row.liguei ?? false,
     observacao: row.observacao,
+    precisaCarona: row.precisaCarona ?? true,
     dataCadastro: row.dataCadastro ?? undefined,
   });
 }
@@ -58,6 +60,7 @@ const contatoComLider = {
   localVotacao: contatoTable.localVotacao,
   liguei: contatoTable.liguei,
   observacao: contatoTable.observacao,
+  precisaCarona: contatoTable.precisaCarona,
   dataCadastro: contatoTable.dataCadastro,
 };
 
@@ -74,6 +77,7 @@ export class DrizzleContatoRepository implements IContatoRepository {
         bairro: contato.bairro,
         whatsapp: contato.whatsapp,
         localVotacao: contato.localVotacao,
+        precisaCarona: contato.precisaCarona,
       })
       .returning();
 
@@ -139,6 +143,7 @@ export class DrizzleContatoRepository implements IContatoRepository {
     };
     if (dados.enderecoLat !== undefined) valores.enderecoLat = dados.enderecoLat;
     if (dados.enderecoLng !== undefined) valores.enderecoLng = dados.enderecoLng;
+    if (dados.precisaCarona !== undefined) valores.precisaCarona = dados.precisaCarona;
 
     const [row] = await db.update(contatoTable).set(valores).where(condicao).returning();
     if (!row) return null;

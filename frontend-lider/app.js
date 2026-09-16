@@ -315,6 +315,7 @@ document.getElementById("salvar").addEventListener("click", async function () {
         bairro: valores.bairro,
         whatsapp: valores.whatsapp,
         localVotacao: valores.votacao,
+        precisaCarona: document.getElementById("precisaCarona").checked,
         bairroGeo: bairroGeoEscolhido || undefined,
         votacaoGeo: votacaoGeoEscolhido || undefined,
         enderecoGeo: enderecoGeoEscolhido || undefined,
@@ -331,6 +332,7 @@ document.getElementById("salvar").addEventListener("click", async function () {
     document.getElementById(id).value = "";
     document.getElementById(id).classList.remove("campo-confirmado");
   });
+  document.getElementById("precisaCarona").checked = true;
   bairroGeoEscolhido = null;
   votacaoGeoEscolhido = null;
   enderecoGeoEscolhido = null;
@@ -364,6 +366,7 @@ async function carregarContatos() {
       votacao: c.localVotacao,
       liguei: c.liguei,
       obs: c.observacao || "",
+      precisaCarona: c.precisaCarona !== false,
       dataCadastro: c.dataCadastro,
     };
   });
@@ -449,6 +452,9 @@ function renderCardEdicao(c) {
         '<div class="sugestoes-caixa" id="editVotacaoSugestoes" hidden></div>' +
       "</div>" +
       '<p class="detalhe">Se mudar o local de votação, digite e escolha a nova opção da lista pra manter o mapa certo.</p>' +
+      '<label class="checkbox-label">' +
+        '<input type="checkbox" class="editPrecisaCarona"' + (c.precisaCarona === false ? "" : " checked") + " />Vai precisar de carona no dia" +
+      "</label>" +
       '<div class="rodape-acoes">' +
         '<button type="button" class="botao-pequeno btnCancelarEdicao" data-id="' + c.id + '">Cancelar</button>' +
         '<button type="button" class="btnSalvarEdicao" data-id="' + c.id + '">Salvar</button>' +
@@ -480,6 +486,7 @@ function renderContatoItem(c, idx, mostrarLiderNaLinha, somenteLeitura) {
       ? '<p class="detalhe">' + ICONE_USERS + 'Líder: ' + escaparAtributo(c.lider) + " · Vota em " + escaparAtributo(c.votacao) + "</p>"
       : '<p class="detalhe">' + ICONE_USERS + "Vota em " + escaparAtributo(c.votacao) + "</p>";
     var linhaData = dataStr ? '<p class="detalhe detalhe--data">Cadastrado em ' + dataStr + "</p>" : "";
+    var linhaCarona = c.precisaCarona === false ? '<p class="detalhe detalhe--sem-carona">Não precisa de carona</p>' : "";
 
     var rodapeEdicao = somenteLeitura
       ? ""
@@ -511,6 +518,7 @@ function renderContatoItem(c, idx, mostrarLiderNaLinha, somenteLeitura) {
             '<p class="detalhe">' + ICONE_PIN + escaparAtributo(c.endereco || "Endereço não informado") + " - " + escaparAtributo(c.bairro || "Bairro não informado") + "</p>" +
             linhaLider +
             linhaData +
+            linhaCarona +
           "</div>" +
           telefoneHtml +
         "</div>" +
@@ -616,6 +624,7 @@ function renderLista() {
         bairro: card.querySelector(".editBairro").value.trim(),
         whatsapp: card.querySelector(".editWhatsapp").value.trim(),
         localVotacao: card.querySelector("#editVotacaoInput").value.trim(),
+        precisaCarona: card.querySelector(".editPrecisaCarona").checked,
       };
       await aguardarBusca("editVotacaoInput");
       el.disabled = true;

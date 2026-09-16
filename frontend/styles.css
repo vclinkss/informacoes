@@ -656,6 +656,11 @@ button:disabled {
   color: var(--texto-suave);
 }
 
+.detalhe--sem-carona {
+  color: #99631D;
+  font-weight: 600;
+}
+
 .status-pill {
   display: inline-flex;
   align-items: center;

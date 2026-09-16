@@ -35,12 +35,14 @@ export class ObterMapaLogistica {
 
   async execute(input: { liderId?: number } = {}): Promise<MapaLogistica> {
     const contatos = await this.contatoRepository.findAll({ liderId: input.liderId });
+    // Só quem marcou que vai precisar de carona entra na conta de carros/rotas.
+    const comCarona = contatos.filter((c) => c.precisaCarona);
 
     const rotasPorChave = new Map<string, RotaTransporte>();
     const nomesBairros = new Set<string>();
     const nomesLocais = new Set<string>();
 
-    for (const c of contatos) {
+    for (const c of comCarona) {
       nomesBairros.add(c.bairro);
       nomesLocais.add(c.localVotacao);
       const chave = c.bairro + "␟" + c.localVotacao;
@@ -86,7 +88,7 @@ export class ObterMapaLogistica {
       if (ponto) locaisVotacao.push(ponto);
     }
 
-    const pontosContatos: PontoContato[] = contatos
+    const pontosContatos: PontoContato[] = comCarona
       .filter((c) => c.enderecoLat !== null && c.enderecoLng !== null && c.id !== undefined)
       .map((c) => ({
         id: c.id as number,

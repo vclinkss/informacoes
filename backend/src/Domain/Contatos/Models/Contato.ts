@@ -11,6 +11,7 @@ export type ContatoProps = {
   localVotacao: string;
   liguei?: boolean;
   observacao?: string | null;
+  precisaCarona?: boolean;
   dataCadastro?: Date;
 };
 
@@ -27,6 +28,7 @@ export class Contato {
   readonly localVotacao: string;
   readonly liguei: boolean;
   readonly observacao: string | null;
+  readonly precisaCarona: boolean;
   readonly dataCadastro?: Date;
 
   constructor(props: ContatoProps) {
@@ -42,6 +44,7 @@ export class Contato {
     this.localVotacao = props.localVotacao;
     this.liguei = props.liguei ?? false;
     this.observacao = props.observacao ?? null;
+    this.precisaCarona = props.precisaCarona ?? true;
     this.dataCadastro = props.dataCadastro;
   }
 

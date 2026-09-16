@@ -55,6 +55,7 @@ export class ExportarContatosExcelController {
         { header: "Local de votação", key: "votacao", width: 32 },
         { header: "Líder", key: "lider", width: 22 },
         { header: "Já ligou", key: "liguei", width: 12 },
+        { header: "Precisa carona", key: "precisaCarona", width: 15 },
         { header: "Observação", key: "observacao", width: 30 },
         { header: "Cadastrado em", key: "cadastradoEm", width: 20 },
       ];
@@ -68,6 +69,7 @@ export class ExportarContatosExcelController {
           votacao: c.localVotacao || "",
           lider: c.liderNome || "",
           liguei: c.liguei ? "Sim" : "Não",
+          precisaCarona: c.precisaCarona ? "Sim" : "Não",
           observacao: c.observacao || "",
           cadastradoEm: formatarData(c.dataCadastro),
         });

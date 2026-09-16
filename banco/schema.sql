@@ -19,11 +19,15 @@ create table if not exists contato (
     local_votacao  varchar(150) not null,
     liguei         boolean default false,
     observacao     varchar(500),
+    precisa_carona boolean default true,
     data_cadastro  timestamptz default now()
 );
 
 alter table contato add column if not exists endereco_lat double precision;
 alter table contato add column if not exists endereco_lng double precision;
+-- Se a pessoa vai precisar de carona no dia (usado pra calcular quantos carros faltam).
+-- Default true pra não perder ninguém que já estava cadastrado antes desse campo existir.
+alter table contato add column if not exists precisa_carona boolean default true;
 
 -- Login e permissões: líder se cadastra sozinho (status "pendente") e só ganha
 -- acesso quando um admin aprova (status "aprovado"). Quem tem role "admin" enxerga

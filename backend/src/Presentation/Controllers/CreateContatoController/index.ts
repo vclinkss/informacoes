@@ -12,6 +12,7 @@ const schema = z.object({
   bairro: z.string().trim().optional(),
   whatsapp: z.string().trim().optional(),
   localVotacao: z.string().trim().optional(),
+  precisaCarona: z.boolean().optional(),
   bairroGeo: pontoSchema,
   votacaoGeo: pontoSchema,
   enderecoGeo: pontoSchema,

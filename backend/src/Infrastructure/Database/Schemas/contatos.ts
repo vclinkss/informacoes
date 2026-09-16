@@ -16,5 +16,6 @@ export const contatoTable = pgTable("contato", {
   localVotacao: varchar("local_votacao", { length: 150 }).notNull(),
   liguei: boolean("liguei").default(false),
   observacao: varchar("observacao", { length: 500 }),
+  precisaCarona: boolean("precisa_carona").default(true),
   dataCadastro: timestamp("data_cadastro", { withTimezone: true }).defaultNow(),
 });

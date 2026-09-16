@@ -18,6 +18,7 @@ export type ContatoEdicao = {
   bairro?: string;
   whatsapp?: string;
   localVotacao?: string;
+  precisaCarona?: boolean;
 };
 
 export interface IContatoRepository {
