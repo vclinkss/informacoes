@@ -5,6 +5,18 @@ const API_BASE_URL = "https://informacoes.onrender.com/api";
 var token = localStorage.getItem("token") || sessionStorage.getItem("token") || null;
 var usuario = null; // { id, nome, email, role, status }
 var contatos = [];  // [{ id, liderId, lider, nome, endereco, bairro, whatsapp, votacao, liguei, obs }]
+var abaAtiva = "contatos";
+
+function mostrarAba(nome) {
+  abaAtiva = nome;
+  document.getElementById("blocoContatos").hidden = nome !== "contatos";
+  document.getElementById("secaoAgenda").hidden = nome !== "agenda";
+  document.getElementById("abaBtnContatos").classList.toggle("aba-ativa", nome === "contatos");
+  document.getElementById("abaBtnAgenda").classList.toggle("aba-ativa", nome === "agenda");
+}
+
+document.getElementById("abaBtnContatos").addEventListener("click", function () { mostrarAba("contatos"); });
+document.getElementById("abaBtnAgenda").addEventListener("click", function () { mostrarAba("agenda"); });
 
 var CORES = ["#1F6E56", "#5DCAA5", "#0F6E56", "#9FE1CB", "#04342C", "#7F77DD", "#D85A30", "#534AB7"];
 
@@ -1070,8 +1082,7 @@ function paraInputDatetimeLocal(iso) {
 
 async function carregarAgenda() {
   var temAcesso = usuario && (usuario.role === "admin" || usuario.role === "agenda");
-  document.getElementById("secaoAgenda").hidden = !temAcesso;
-  if (!temAcesso) return; // líder comum não tem acesso à agenda
+  if (!temAcesso) { document.getElementById("secaoAgenda").hidden = true; return; } // líder comum não tem acesso à agenda
 
   document.getElementById("tituloAgenda").textContent = "Todos os compromissos";
   try {
@@ -1327,8 +1338,23 @@ async function iniciarApp() {
   // Motorista só visualiza: não cadastra contato novo.
   document.getElementById("cardNovoContato").hidden = usuario.role === "motorista";
 
+  var podeVerContatos = usuario.role !== "agenda";
+  var podeVerAgenda = usuario.role === "admin" || usuario.role === "agenda";
+
   // Papel "agenda" só enxerga a agenda — nada de contatos, mapa, estatísticas etc.
-  document.getElementById("secaoOperacional").hidden = usuario.role === "agenda";
+  document.getElementById("secaoOperacional").hidden = !podeVerContatos;
+
+  var navAbas = document.getElementById("navAbas");
+  if (podeVerContatos && podeVerAgenda) {
+    navAbas.hidden = false;
+    document.getElementById("abaBtnContatos").hidden = false;
+    document.getElementById("abaBtnAgenda").hidden = false;
+    mostrarAba(abaAtiva || "contatos");
+  } else {
+    navAbas.hidden = true;
+    document.getElementById("blocoContatos").hidden = !podeVerContatos;
+    document.getElementById("secaoAgenda").hidden = !podeVerAgenda;
+  }
 
   mostrarApp();
   await carregarPendentes();

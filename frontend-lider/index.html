@@ -76,6 +76,11 @@
       </div>
     </header>
 
+    <nav id="navAbas" class="nav-abas" hidden>
+      <button type="button" class="aba-btn" id="abaBtnContatos" data-aba="contatos">Contatos</button>
+      <button type="button" class="aba-btn" id="abaBtnAgenda" data-aba="agenda">Agenda</button>
+    </nav>
+
     <div id="secaoAgenda" hidden>
       <h2 class="titulo-secao titulo-secao--espacada">Agenda de compromissos</h2>
       <div class="grid-formularios">
@@ -131,6 +136,7 @@
     </div>
 
     <div id="secaoOperacional">
+    <div id="blocoContatos">
     <section class="stats-row" id="statsRow">
       <div class="stat">
         <span class="stat-valor" id="statTotal">–</span>
@@ -223,6 +229,7 @@
         </div>
         <div id="listaContatosCompleta"></div>
       </div>
+    </div>
     </div>
 
     <h2 class="titulo-secao titulo-secao--espacada">Contatos por bairro e por local de votação</h2>

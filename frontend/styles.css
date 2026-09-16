@@ -209,6 +209,43 @@ body::after {
   padding-top: 28px;
 }
 
+/* ---- Abas (Contatos / Agenda) ---- */
+.nav-abas {
+  display: flex;
+  gap: 6px;
+  background: var(--superficie);
+  border: 1px solid rgba(31, 110, 86, 0.14);
+  border-radius: 14px;
+  padding: 6px;
+  margin-bottom: 18px;
+  animation: entrada 0.55s ease both;
+}
+
+.aba-btn {
+  flex: 1;
+  background: none;
+  color: var(--texto-suave);
+  border: none;
+  box-shadow: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 700;
+  font-size: 13.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.aba-btn:hover {
+  transform: none;
+  box-shadow: none;
+  background: rgba(31, 110, 86, 0.08);
+}
+
+.aba-btn.aba-ativa {
+  background: linear-gradient(120deg, var(--verde), var(--verde-escuro));
+  color: #fff;
+}
+
 /* ---- Login / Cadastro ---- */
 .auth-wrap {
   min-height: calc(100vh - 40px);
