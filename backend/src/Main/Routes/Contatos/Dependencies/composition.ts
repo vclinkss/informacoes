@@ -12,6 +12,7 @@ import { UpdateStatusLigacaoController } from "../../../../Presentation/Controll
 import { UpdateContatoController } from "../../../../Presentation/Controllers/UpdateContatoController";
 import { DeleteContatoController } from "../../../../Presentation/Controllers/DeleteContatoController";
 import { EstatisticasController } from "../../../../Presentation/Controllers/EstatisticasController";
+import { ExportarContatosExcelController } from "../../../../Presentation/Controllers/ExportarContatosExcelController";
 
 const contatoRepository = new DrizzleContatoRepository();
 const geoCacheRepository = new DrizzleGeoCacheRepository();
@@ -44,4 +45,9 @@ export function makeUpdateStatusLigacaoController() {
 export function makeEstatisticasController() {
   const useCase = new GetEstatisticas(contatoRepository);
   return new EstatisticasController(useCase);
+}
+
+export function makeExportarContatosExcelController() {
+  const useCase = new ListContatos(contatoRepository);
+  return new ExportarContatosExcelController(useCase);
 }

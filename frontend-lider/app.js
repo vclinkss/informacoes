@@ -670,54 +670,42 @@ document.getElementById("btnFecharModalContatos").addEventListener("click", func
 });
 
 // ---- Exportar lista de contatos pra Excel (.xlsx) ----
-document.getElementById("btnExportarExcel").addEventListener("click", function () {
-  var termo = document.getElementById("busca").value.trim().toLowerCase();
+document.getElementById("btnExportarExcel").addEventListener("click", async function () {
+  var botao = this;
   var liderFiltroEl = document.getElementById("filtroLider");
   var liderFiltro = liderFiltroEl ? liderFiltroEl.value : "";
 
-  var filtrados = contatos.filter(function (c) {
-    var passaTexto = !termo ||
-      c.nome.toLowerCase().indexOf(termo) !== -1 ||
-      c.bairro.toLowerCase().indexOf(termo) !== -1 ||
-      c.lider.toLowerCase().indexOf(termo) !== -1;
-    var passaLider = !liderFiltro || String(c.liderId) === liderFiltro;
-    return passaTexto && passaLider;
-  });
+  var caminho = "/contatos/exportar" + (liderFiltro ? "?liderId=" + encodeURIComponent(liderFiltro) : "");
 
-  if (!filtrados.length) {
-    mostrarErro("Não há contatos pra exportar.");
-    return;
+  botao.disabled = true;
+  var textoOriginal = botao.textContent;
+  botao.textContent = "Gerando...";
+  try {
+    var resposta = await fetch(API_BASE_URL + caminho, {
+      headers: { Authorization: "Bearer " + token },
+    });
+    if (!resposta.ok) {
+      var corpo = await resposta.json().catch(function () { return {}; });
+      throw new Error(corpo.error || "Erro ao gerar planilha (" + resposta.status + ")");
+    }
+    var blob = await resposta.blob();
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement("a");
+    link.href = url;
+
+    var hoje = new Date();
+    var pad = function (n) { return String(n).padStart(2, "0"); };
+    link.download = "contatos-" + hoje.getFullYear() + "-" + pad(hoje.getMonth() + 1) + "-" + pad(hoje.getDate()) + ".xlsx";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    mostrarErro("Erro ao exportar: " + e.message);
+  } finally {
+    botao.disabled = false;
+    botao.textContent = textoOriginal;
   }
-
-  var mostrarLider = usuario && (usuario.role === "admin" || usuario.role === "motorista");
-
-  var linhas = filtrados.map(function (c) {
-    var linha = {
-      "Nome": c.nome || "",
-      "WhatsApp": c.whatsapp || "",
-      "Endereço": c.endereco || "",
-      "Bairro": c.bairro || "",
-      "Local de votação": c.votacao || "",
-    };
-    if (mostrarLider) linha["Líder"] = c.lider || "";
-    linha["Já ligou"] = c.liguei ? "Sim" : "Não";
-    linha["Observação"] = c.obs || "";
-    linha["Cadastrado em"] = formatarDataCadastro(c.dataCadastro) || "";
-    return linha;
-  });
-
-  var planilha = XLSX.utils.json_to_sheet(linhas);
-  planilha["!cols"] = Object.keys(linhas[0]).map(function (chave) {
-    return { wch: Math.max(chave.length, 18) };
-  });
-
-  var livro = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(livro, planilha, "Contatos");
-
-  var hoje = new Date();
-  var pad = function (n) { return String(n).padStart(2, "0"); };
-  var nomeArquivo = "contatos-" + hoje.getFullYear() + "-" + pad(hoje.getMonth() + 1) + "-" + pad(hoje.getDate()) + ".xlsx";
-  XLSX.writeFile(livro, nomeArquivo);
 });
 
 // ---- Gráficos donut: por bairro e por local de votação (a partir da lista já carregada) ----

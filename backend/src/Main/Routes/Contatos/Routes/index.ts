@@ -5,6 +5,7 @@ import {
   makeCreateContatoController,
   makeDeleteContatoController,
   makeEstatisticasController,
+  makeExportarContatosExcelController,
   makeListContatosController,
   makeUpdateContatoController,
   makeUpdateStatusLigacaoController,
@@ -20,11 +21,15 @@ const updateStatusLigacaoController = makeUpdateStatusLigacaoController();
 const updateContatoController = makeUpdateContatoController();
 const deleteContatoController = makeDeleteContatoController();
 const estatisticasController = makeEstatisticasController();
+const exportarContatosExcelController = makeExportarContatosExcelController();
 
 // Leitura: aberta pra todo mundo autenticado (o controller escopa por papel).
 contatosRouter.get("/", (req, res, next) => listContatosController.handle(req, res, next));
 contatosRouter.get("/estatisticas", (req, res, next) =>
   estatisticasController.handle(req, res, next)
+);
+contatosRouter.get("/exportar", (req, res, next) =>
+  exportarContatosExcelController.handle(req, res, next)
 );
 
 // Escrita: motorista não cadastra/edita/apaga nada.
