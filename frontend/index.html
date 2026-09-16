@@ -14,6 +14,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -212,7 +213,10 @@
       </section>
     </div>
 
-    <h2 id="tituloLista" class="titulo-secao">Meus contatos</h2>
+    <div class="titulo-com-acao">
+      <h2 id="tituloLista" class="titulo-secao">Meus contatos</h2>
+      <button type="button" id="btnExportarExcel" class="botao-pequeno botao-exportar">Exportar Excel</button>
+    </div>
     <div id="lista"><p class="detalhe">Carregando...</p></div>
     <button type="button" id="btnVerMaisContatos" class="botao-pequeno botao-ver-mais" hidden>Ver mais</button>
 

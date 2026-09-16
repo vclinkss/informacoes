@@ -473,6 +473,33 @@ button:disabled {
   margin: 0 0 10px;
 }
 
+.titulo-com-acao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.titulo-com-acao .titulo-secao {
+  margin: 0 0 10px;
+}
+
+.botao-exportar {
+  background: none;
+  color: var(--verde);
+  border: 1px solid rgba(31, 110, 86, 0.3);
+  box-shadow: none;
+  margin-bottom: 10px;
+  white-space: nowrap;
+}
+
+.botao-exportar:hover {
+  background: #F0F8F4;
+  transform: none;
+  box-shadow: none;
+}
+
 .titulo-secao--espacada {
   margin-top: 30px;
 }
