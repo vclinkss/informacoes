@@ -77,6 +77,15 @@ body::after {
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes saidaAba {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-10px); }
+}
+
+.aba-fechando {
+  animation: saidaAba 0.2s ease both;
+}
+
 .hero {
   animation: entrada 0.55s ease both;
 }

@@ -6,21 +6,41 @@ var token = localStorage.getItem("token") || sessionStorage.getItem("token") || 
 var usuario = null; // { id, nome, email, role, status }
 var contatos = [];  // [{ id, liderId, lider, nome, endereco, bairro, whatsapp, votacao, liguei, obs }]
 var abaAtiva = null;
+var ABA_ANIM_MS = 200;
+
+function esconderAbaComAnimacao(elId, aoTerminar) {
+  var el = document.getElementById(elId);
+  if (el.hidden) { if (aoTerminar) aoTerminar(); return; }
+  el.classList.add("aba-fechando");
+  setTimeout(function () {
+    el.hidden = true;
+    el.classList.remove("aba-fechando");
+    if (aoTerminar) aoTerminar();
+  }, ABA_ANIM_MS);
+}
 
 function mostrarAba(nome) {
   abaAtiva = nome;
-  document.getElementById("blocoContatos").hidden = nome !== "contatos";
-  document.getElementById("secaoAgenda").hidden = nome !== "agenda";
   document.getElementById("abaBtnContatos").classList.toggle("aba-ativa", nome === "contatos");
   document.getElementById("abaBtnAgenda").classList.toggle("aba-ativa", nome === "agenda");
+
+  if (nome === "contatos") {
+    esconderAbaComAnimacao("secaoAgenda", function () {
+      document.getElementById("blocoContatos").hidden = false;
+    });
+  } else {
+    esconderAbaComAnimacao("blocoContatos", function () {
+      document.getElementById("secaoAgenda").hidden = false;
+    });
+  }
 }
 
 function fecharAbas() {
   abaAtiva = null;
-  document.getElementById("blocoContatos").hidden = true;
-  document.getElementById("secaoAgenda").hidden = true;
   document.getElementById("abaBtnContatos").classList.remove("aba-ativa");
   document.getElementById("abaBtnAgenda").classList.remove("aba-ativa");
+  esconderAbaComAnimacao("blocoContatos");
+  esconderAbaComAnimacao("secaoAgenda");
 }
 
 document.getElementById("abaBtnContatos").addEventListener("click", function () {
