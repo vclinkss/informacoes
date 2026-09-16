@@ -14,6 +14,7 @@ const schema = z.object({
   localVotacao: z.string().trim().optional(),
   zona: z.string().trim().max(10).optional(),
   secao: z.string().trim().max(10).optional(),
+  observacao: z.string().trim().max(500).optional(),
   precisaCarona: z.boolean().optional(),
   bairroGeo: pontoSchema,
   votacaoGeo: pontoSchema,

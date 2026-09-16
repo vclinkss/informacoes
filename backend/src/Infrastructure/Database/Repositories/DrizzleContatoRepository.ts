@@ -85,6 +85,7 @@ export class DrizzleContatoRepository implements IContatoRepository {
         localVotacao: contato.localVotacao,
         zona: contato.zona,
         secao: contato.secao,
+        observacao: contato.observacao,
         precisaCarona: contato.precisaCarona,
       })
       .returning();

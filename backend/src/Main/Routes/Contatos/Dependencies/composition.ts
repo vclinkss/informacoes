@@ -13,6 +13,8 @@ import { UpdateContatoController } from "../../../../Presentation/Controllers/Up
 import { DeleteContatoController } from "../../../../Presentation/Controllers/DeleteContatoController";
 import { EstatisticasController } from "../../../../Presentation/Controllers/EstatisticasController";
 import { ExportarContatosExcelController } from "../../../../Presentation/Controllers/ExportarContatosExcelController";
+import { ImportarContatosExcelController } from "../../../../Presentation/Controllers/ImportarContatosExcelController";
+import { ModeloImportacaoExcelController } from "../../../../Presentation/Controllers/ModeloImportacaoExcelController";
 
 const contatoRepository = new DrizzleContatoRepository();
 const geoCacheRepository = new DrizzleGeoCacheRepository();
@@ -50,4 +52,13 @@ export function makeEstatisticasController() {
 export function makeExportarContatosExcelController() {
   const useCase = new ListContatos(contatoRepository);
   return new ExportarContatosExcelController(useCase);
+}
+
+export function makeImportarContatosExcelController() {
+  const useCase = new CreateContato(contatoRepository, geoCacheRepository);
+  return new ImportarContatosExcelController(useCase);
+}
+
+export function makeModeloImportacaoExcelController() {
+  return new ModeloImportacaoExcelController();
 }

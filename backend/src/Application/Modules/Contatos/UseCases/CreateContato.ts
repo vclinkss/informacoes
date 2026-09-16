@@ -14,6 +14,7 @@ export type CreateContatoInput = {
   localVotacao?: string;
   zona?: string | null;
   secao?: string | null;
+  observacao?: string | null;
   precisaCarona?: boolean;
   /** Se a pessoa escolheu o bairro/local numa sugestão de busca, já vem com a localização exata. */
   bairroGeo?: PontoOpcional;
@@ -41,6 +42,7 @@ export class CreateContato {
       localVotacao: input.localVotacao?.trim() || "",
       zona: input.zona?.trim() || null,
       secao: input.secao?.trim() || null,
+      observacao: input.observacao?.trim() || null,
       precisaCarona: input.precisaCarona ?? true,
     });
 

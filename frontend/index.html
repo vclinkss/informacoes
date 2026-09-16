@@ -239,8 +239,14 @@
 
     <div class="titulo-com-acao">
       <h2 id="tituloLista" class="titulo-secao">Meus contatos</h2>
-      <button type="button" id="btnExportarExcel" class="botao-pequeno botao-exportar">Exportar Excel</button>
+      <div class="acoes-excel">
+        <a href="#" id="linkModeloImportacao" class="link-modelo">Baixar modelo</a>
+        <button type="button" id="btnImportarExcel" class="botao-pequeno botao-exportar">Importar Excel</button>
+        <button type="button" id="btnExportarExcel" class="botao-pequeno botao-exportar">Exportar Excel</button>
+        <input type="file" id="inputImportarExcel" accept=".xlsx" hidden />
+      </div>
     </div>
+    <p class="detalhe" id="resultadoImportacao"></p>
     <div id="lista"><p class="detalhe">Carregando...</p></div>
     <button type="button" id="btnVerMaisContatos" class="botao-pequeno botao-ver-mais" hidden>Ver mais</button>
 

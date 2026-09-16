@@ -775,6 +775,72 @@ document.getElementById("btnExportarExcel").addEventListener("click", async func
   }
 });
 
+// ---- Baixar modelo de planilha pra importação ----
+document.getElementById("linkModeloImportacao").addEventListener("click", async function (e) {
+  e.preventDefault();
+  try {
+    var resposta = await fetch(API_BASE_URL + "/contatos/modelo-importacao", {
+      headers: { Authorization: "Bearer " + token },
+    });
+    if (!resposta.ok) throw new Error("Erro ao gerar modelo (" + resposta.status + ")");
+    var blob = await resposta.blob();
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement("a");
+    link.href = url;
+    link.download = "modelo-importacao-contatos.xlsx";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    mostrarErro("Erro ao baixar modelo: " + err.message);
+  }
+});
+
+// ---- Importar contatos de uma planilha Excel ----
+document.getElementById("btnImportarExcel").addEventListener("click", function () {
+  document.getElementById("inputImportarExcel").click();
+});
+
+document.getElementById("inputImportarExcel").addEventListener("change", async function () {
+  var arquivo = this.files[0];
+  this.value = ""; // permite escolher o mesmo arquivo de novo depois, se precisar
+  if (!arquivo) return;
+
+  var resultadoEl = document.getElementById("resultadoImportacao");
+  var botao = document.getElementById("btnImportarExcel");
+  botao.disabled = true;
+  var textoOriginal = botao.textContent;
+  botao.textContent = "Importando...";
+  resultadoEl.textContent = "";
+
+  try {
+    var formData = new FormData();
+    formData.append("arquivo", arquivo);
+    var resposta = await fetch(API_BASE_URL + "/contatos/importar", {
+      method: "POST",
+      headers: { Authorization: "Bearer " + token },
+      body: formData,
+    });
+    var corpo = await resposta.json().catch(function () { return {}; });
+    if (!resposta.ok) throw new Error(corpo.error || "Erro ao importar (" + resposta.status + ")");
+
+    var msg = corpo.importados + " contato(s) importado(s)";
+    if (corpo.ignorados) msg += ", " + corpo.ignorados + " linha(s) sem nome ignorada(s)";
+    if (corpo.erros && corpo.erros.length) msg += ". Erros: " + corpo.erros.join("; ");
+    resultadoEl.textContent = msg;
+
+    await carregarContatos();
+    await carregarLogistica();
+    await carregarSugestoes();
+  } catch (e) {
+    resultadoEl.textContent = "Erro ao importar: " + e.message;
+  } finally {
+    botao.disabled = false;
+    botao.textContent = textoOriginal;
+  }
+});
+
 // ---- Gráficos donut: por bairro e por local de votação (a partir da lista já carregada) ----
 var chartBairro = null;
 var chartEscola = null;
