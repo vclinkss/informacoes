@@ -15,8 +15,20 @@ function mostrarAba(nome) {
   document.getElementById("abaBtnAgenda").classList.toggle("aba-ativa", nome === "agenda");
 }
 
-document.getElementById("abaBtnContatos").addEventListener("click", function () { mostrarAba("contatos"); });
-document.getElementById("abaBtnAgenda").addEventListener("click", function () { mostrarAba("agenda"); });
+function fecharAbas() {
+  abaAtiva = null;
+  document.getElementById("blocoContatos").hidden = true;
+  document.getElementById("secaoAgenda").hidden = true;
+  document.getElementById("abaBtnContatos").classList.remove("aba-ativa");
+  document.getElementById("abaBtnAgenda").classList.remove("aba-ativa");
+}
+
+document.getElementById("abaBtnContatos").addEventListener("click", function () {
+  if (abaAtiva === "contatos") fecharAbas(); else mostrarAba("contatos");
+});
+document.getElementById("abaBtnAgenda").addEventListener("click", function () {
+  if (abaAtiva === "agenda") fecharAbas(); else mostrarAba("agenda");
+});
 
 var CORES = ["#1F6E56", "#5DCAA5", "#0F6E56", "#9FE1CB", "#04342C", "#7F77DD", "#D85A30", "#534AB7"];
 
