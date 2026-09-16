@@ -5,7 +5,7 @@ const API_BASE_URL = "https://informacoes.onrender.com/api";
 var token = localStorage.getItem("token") || sessionStorage.getItem("token") || null;
 var usuario = null; // { id, nome, email, role, status }
 var contatos = [];  // [{ id, liderId, lider, nome, endereco, bairro, whatsapp, votacao, liguei, obs }]
-var abaAtiva = "contatos";
+var abaAtiva = null;
 
 function mostrarAba(nome) {
   abaAtiva = nome;
@@ -1349,7 +1349,12 @@ async function iniciarApp() {
     navAbas.hidden = false;
     document.getElementById("abaBtnContatos").hidden = false;
     document.getElementById("abaBtnAgenda").hidden = false;
-    mostrarAba(abaAtiva || "contatos");
+    if (abaAtiva) {
+      mostrarAba(abaAtiva); // só reabre uma aba se o usuário já tinha escolhido uma nesta sessão
+    } else {
+      document.getElementById("blocoContatos").hidden = true;
+      document.getElementById("secaoAgenda").hidden = true;
+    }
   } else {
     navAbas.hidden = true;
     document.getElementById("blocoContatos").hidden = !podeVerContatos;

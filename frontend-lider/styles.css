@@ -201,38 +201,42 @@ body::after {
 /* ---- Abas (Contatos / Agenda) ---- */
 .nav-abas {
   display: flex;
-  gap: 6px;
-  background: var(--superficie);
-  border: 1px solid rgba(31, 110, 86, 0.14);
-  border-radius: 14px;
-  padding: 6px;
+  gap: 10px;
   margin-bottom: 18px;
   animation: entrada 0.55s ease both;
 }
 
 .aba-btn {
-  flex: 1;
-  background: none;
-  color: var(--texto-suave);
-  border: none;
-  box-shadow: none;
-  border-radius: 10px;
-  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 92px;
+  height: 82px;
+  background: var(--superficie);
+  color: var(--verde-escuro);
+  border: 1px solid rgba(31, 110, 86, 0.16);
+  box-shadow: 0 4px 12px -8px rgba(15, 61, 48, 0.3);
+  border-radius: 16px;
+  padding: 10px 8px;
   font-weight: 700;
-  font-size: 13.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  font-size: 12px;
+}
+
+.aba-icone {
+  flex-shrink: 0;
 }
 
 .aba-btn:hover {
-  transform: none;
-  box-shadow: none;
-  background: rgba(31, 110, 86, 0.08);
+  transform: translateY(-2px);
+  background: #F0F8F4;
 }
 
 .aba-btn.aba-ativa {
-  background: linear-gradient(120deg, var(--verde), var(--verde-escuro));
+  background: linear-gradient(160deg, var(--verde), var(--verde-escuro));
   color: #fff;
+  border-color: transparent;
 }
 
 /* ---- Login / Cadastro ---- */
