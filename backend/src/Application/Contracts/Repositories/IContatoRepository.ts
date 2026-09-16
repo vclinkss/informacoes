@@ -18,6 +18,8 @@ export type ContatoEdicao = {
   bairro?: string;
   whatsapp?: string;
   localVotacao?: string;
+  zona?: string | null;
+  secao?: string | null;
   precisaCarona?: boolean;
 };
 

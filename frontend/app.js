@@ -296,7 +296,7 @@ document.getElementById("bairro").addEventListener("change", function () {
 
 // ---- Formulário de contato ----
 document.getElementById("salvar").addEventListener("click", async function () {
-  var campos = ["nome", "endereco", "bairro", "whatsapp", "votacao"];
+  var campos = ["nome", "endereco", "bairro", "whatsapp", "votacao", "zona", "secao"];
   var valores = {};
   campos.forEach(function (id) {
     valores[id] = document.getElementById(id).value.trim();
@@ -315,6 +315,8 @@ document.getElementById("salvar").addEventListener("click", async function () {
         bairro: valores.bairro,
         whatsapp: valores.whatsapp,
         localVotacao: valores.votacao,
+        zona: valores.zona,
+        secao: valores.secao,
         precisaCarona: document.getElementById("precisaCarona").checked,
         bairroGeo: bairroGeoEscolhido || undefined,
         votacaoGeo: votacaoGeoEscolhido || undefined,
@@ -364,6 +366,8 @@ async function carregarContatos() {
       bairro: c.bairro,
       whatsapp: c.whatsapp,
       votacao: c.localVotacao,
+      zona: c.zona || "",
+      secao: c.secao || "",
       liguei: c.liguei,
       obs: c.observacao || "",
       precisaCarona: c.precisaCarona !== false,
@@ -452,6 +456,10 @@ function renderCardEdicao(c) {
         '<div class="sugestoes-caixa" id="editVotacaoSugestoes" hidden></div>' +
       "</div>" +
       '<p class="detalhe">Se mudar o local de votação, digite e escolha a nova opção da lista pra manter o mapa certo.</p>' +
+      '<div class="grid2">' +
+        '<div><label>Zona eleitoral</label><input type="text" class="editZona" value="' + escaparAtributo(c.zona) + '" autocomplete="off" /></div>' +
+        '<div><label>Seção eleitoral</label><input type="text" class="editSecao" value="' + escaparAtributo(c.secao) + '" autocomplete="off" /></div>' +
+      "</div>" +
       '<label class="checkbox-label">' +
         '<input type="checkbox" class="editPrecisaCarona"' + (c.precisaCarona === false ? "" : " checked") + " />Vai precisar de carona no dia" +
       "</label>" +
@@ -487,6 +495,9 @@ function renderContatoItem(c, idx, mostrarLiderNaLinha, somenteLeitura) {
       : '<p class="detalhe">' + ICONE_USERS + "Vota em " + escaparAtributo(c.votacao) + "</p>";
     var linhaData = dataStr ? '<p class="detalhe detalhe--data">Cadastrado em ' + dataStr + "</p>" : "";
     var linhaCarona = c.precisaCarona === false ? '<p class="detalhe detalhe--sem-carona">Não precisa de carona</p>' : "";
+    var linhaZonaSecao = (c.zona || c.secao)
+      ? '<p class="detalhe">Zona ' + escaparAtributo(c.zona || "?") + " · Seção " + escaparAtributo(c.secao || "?") + "</p>"
+      : "";
 
     var rodapeEdicao = somenteLeitura
       ? ""
@@ -517,6 +528,7 @@ function renderContatoItem(c, idx, mostrarLiderNaLinha, somenteLeitura) {
             '<p class="nome">' + escaparAtributo(c.nome || "(sem nome)") + ' <span class="status-pill ' + pillClasse + '">' + pillTexto + "</span></p>" +
             '<p class="detalhe">' + ICONE_PIN + escaparAtributo(c.endereco || "Endereço não informado") + " - " + escaparAtributo(c.bairro || "Bairro não informado") + "</p>" +
             linhaLider +
+            linhaZonaSecao +
             linhaData +
             linhaCarona +
           "</div>" +
@@ -624,6 +636,8 @@ function renderLista() {
         bairro: card.querySelector(".editBairro").value.trim(),
         whatsapp: card.querySelector(".editWhatsapp").value.trim(),
         localVotacao: card.querySelector("#editVotacaoInput").value.trim(),
+        zona: card.querySelector(".editZona").value.trim(),
+        secao: card.querySelector(".editSecao").value.trim(),
         precisaCarona: card.querySelector(".editPrecisaCarona").checked,
       };
       await aguardarBusca("editVotacaoInput");

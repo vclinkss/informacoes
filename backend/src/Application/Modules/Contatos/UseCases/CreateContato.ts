@@ -12,6 +12,8 @@ export type CreateContatoInput = {
   bairro?: string;
   whatsapp?: string;
   localVotacao?: string;
+  zona?: string | null;
+  secao?: string | null;
   precisaCarona?: boolean;
   /** Se a pessoa escolheu o bairro/local numa sugestão de busca, já vem com a localização exata. */
   bairroGeo?: PontoOpcional;
@@ -37,6 +39,8 @@ export class CreateContato {
       bairro: input.bairro?.trim() || "",
       whatsapp: input.whatsapp?.trim() || "",
       localVotacao: input.localVotacao?.trim() || "",
+      zona: input.zona?.trim() || null,
+      secao: input.secao?.trim() || null,
       precisaCarona: input.precisaCarona ?? true,
     });
 

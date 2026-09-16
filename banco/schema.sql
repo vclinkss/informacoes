@@ -17,6 +17,8 @@ create table if not exists contato (
     bairro         varchar(100) not null,
     whatsapp       varchar(20)  not null,
     local_votacao  varchar(150) not null,
+    zona           varchar(10),
+    secao          varchar(10),
     liguei         boolean default false,
     observacao     varchar(500),
     precisa_carona boolean default true,
@@ -28,6 +30,9 @@ alter table contato add column if not exists endereco_lng double precision;
 -- Se a pessoa vai precisar de carona no dia (usado pra calcular quantos carros faltam).
 -- Default true pra não perder ninguém que já estava cadastrado antes desse campo existir.
 alter table contato add column if not exists precisa_carona boolean default true;
+-- Zona e seção eleitoral, quando conhecidas (ex.: mapeamento manual de área).
+alter table contato add column if not exists zona varchar(10);
+alter table contato add column if not exists secao varchar(10);
 
 -- Login e permissões: líder se cadastra sozinho (status "pendente") e só ganha
 -- acesso quando um admin aprova (status "aprovado"). Quem tem role "admin" enxerga

@@ -22,6 +22,8 @@ type ContatoRow = {
   bairro: string;
   whatsapp: string;
   localVotacao: string;
+  zona: string | null;
+  secao: string | null;
   liguei: boolean | null;
   observacao: string | null;
   precisaCarona: boolean | null;
@@ -40,6 +42,8 @@ function toDomain(row: ContatoRow): Contato {
     bairro: row.bairro,
     whatsapp: row.whatsapp,
     localVotacao: row.localVotacao,
+    zona: row.zona,
+    secao: row.secao,
     liguei: row.liguei ?? false,
     observacao: row.observacao,
     precisaCarona: row.precisaCarona ?? true,
@@ -58,6 +62,8 @@ const contatoComLider = {
   bairro: contatoTable.bairro,
   whatsapp: contatoTable.whatsapp,
   localVotacao: contatoTable.localVotacao,
+  zona: contatoTable.zona,
+  secao: contatoTable.secao,
   liguei: contatoTable.liguei,
   observacao: contatoTable.observacao,
   precisaCarona: contatoTable.precisaCarona,
@@ -77,6 +83,8 @@ export class DrizzleContatoRepository implements IContatoRepository {
         bairro: contato.bairro,
         whatsapp: contato.whatsapp,
         localVotacao: contato.localVotacao,
+        zona: contato.zona,
+        secao: contato.secao,
         precisaCarona: contato.precisaCarona,
       })
       .returning();
@@ -144,6 +152,8 @@ export class DrizzleContatoRepository implements IContatoRepository {
     if (dados.enderecoLat !== undefined) valores.enderecoLat = dados.enderecoLat;
     if (dados.enderecoLng !== undefined) valores.enderecoLng = dados.enderecoLng;
     if (dados.precisaCarona !== undefined) valores.precisaCarona = dados.precisaCarona;
+    if (dados.zona !== undefined) valores.zona = dados.zona;
+    if (dados.secao !== undefined) valores.secao = dados.secao;
 
     const [row] = await db.update(contatoTable).set(valores).where(condicao).returning();
     if (!row) return null;

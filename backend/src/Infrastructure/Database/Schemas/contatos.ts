@@ -14,6 +14,8 @@ export const contatoTable = pgTable("contato", {
   bairro: varchar("bairro", { length: 100 }).notNull(),
   whatsapp: varchar("whatsapp", { length: 20 }).notNull(),
   localVotacao: varchar("local_votacao", { length: 150 }).notNull(),
+  zona: varchar("zona", { length: 10 }),
+  secao: varchar("secao", { length: 10 }),
   liguei: boolean("liguei").default(false),
   observacao: varchar("observacao", { length: 500 }),
   precisaCarona: boolean("precisa_carona").default(true),

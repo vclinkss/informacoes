@@ -9,6 +9,8 @@ export type ContatoProps = {
   bairro: string;
   whatsapp: string;
   localVotacao: string;
+  zona?: string | null;
+  secao?: string | null;
   liguei?: boolean;
   observacao?: string | null;
   precisaCarona?: boolean;
@@ -26,6 +28,8 @@ export class Contato {
   readonly bairro: string;
   readonly whatsapp: string;
   readonly localVotacao: string;
+  readonly zona: string | null;
+  readonly secao: string | null;
   readonly liguei: boolean;
   readonly observacao: string | null;
   readonly precisaCarona: boolean;
@@ -42,6 +46,8 @@ export class Contato {
     this.bairro = props.bairro;
     this.whatsapp = props.whatsapp;
     this.localVotacao = props.localVotacao;
+    this.zona = props.zona ?? null;
+    this.secao = props.secao ?? null;
     this.liguei = props.liguei ?? false;
     this.observacao = props.observacao ?? null;
     this.precisaCarona = props.precisaCarona ?? true;
