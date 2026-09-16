@@ -210,6 +210,17 @@
 
     <h2 id="tituloLista" class="titulo-secao">Meus contatos</h2>
     <div id="lista"><p class="detalhe">Carregando...</p></div>
+    <button type="button" id="btnVerMaisContatos" class="botao-pequeno botao-ver-mais" hidden>Ver mais</button>
+
+    <div id="modalContatosCompleto" class="modal-agenda" hidden>
+      <div class="modal-agenda-conteudo">
+        <div class="modal-agenda-cabecalho">
+          <h2 class="card-titulo">Todos os contatos</h2>
+          <button type="button" id="btnFecharModalContatos" class="botao-pequeno">Fechar</button>
+        </div>
+        <div id="listaContatosCompleta"></div>
+      </div>
+    </div>
 
     <h2 class="titulo-secao titulo-secao--espacada">Contatos por bairro e por local de votação</h2>
     <div class="charts">

@@ -422,31 +422,10 @@ function formatarDataCadastro(iso) {
   return dataStr + " às " + horaStr;
 }
 
-function renderLista() {
-  var termo = document.getElementById("busca").value.trim().toLowerCase();
-  var liderFiltroEl = document.getElementById("filtroLider");
-  var liderFiltro = liderFiltroEl ? liderFiltroEl.value : "";
+var contatosModalAberto = false;
+var LIMITE_CONTATOS_RESUMO = 3;
 
-  var filtrados = contatos.filter(function (c) {
-    var passaTexto = !termo ||
-      c.nome.toLowerCase().indexOf(termo) !== -1 ||
-      c.bairro.toLowerCase().indexOf(termo) !== -1 ||
-      c.lider.toLowerCase().indexOf(termo) !== -1;
-    var passaLider = !liderFiltro || String(c.liderId) === liderFiltro;
-    return passaTexto && passaLider;
-  });
-
-  var lista = document.getElementById("lista");
-  if (filtrados.length === 0) {
-    lista.innerHTML = '<p class="detalhe">Nenhum contato encontrado.</p>';
-    return;
-  }
-
-  var mostrarLiderNaLinha = usuario && usuario.role === "admin";
-
-  var somenteLeitura = usuario && usuario.role === "motorista";
-
-  lista.innerHTML = filtrados.map(function (c, idx) {
+function renderContatoItem(c, idx, mostrarLiderNaLinha, somenteLeitura) {
     if (editandoId === c.id) return renderCardEdicao(c);
 
     var pillClasse = c.liguei ? "status-pill--sim" : "status-pill--nao";
@@ -503,7 +482,65 @@ function renderLista() {
         rodapeAcoesGestao +
       "</div>"
     );
-  }).join("");
+}
+
+function renderLista() {
+  var termo = document.getElementById("busca").value.trim().toLowerCase();
+  var liderFiltroEl = document.getElementById("filtroLider");
+  var liderFiltro = liderFiltroEl ? liderFiltroEl.value : "";
+
+  var filtrados = contatos.filter(function (c) {
+    var passaTexto = !termo ||
+      c.nome.toLowerCase().indexOf(termo) !== -1 ||
+      c.bairro.toLowerCase().indexOf(termo) !== -1 ||
+      c.lider.toLowerCase().indexOf(termo) !== -1;
+    var passaLider = !liderFiltro || String(c.liderId) === liderFiltro;
+    return passaTexto && passaLider;
+  });
+
+  var estaFiltrando = !!termo || !!liderFiltro;
+  var lista = document.getElementById("lista");
+  var btnVerMais = document.getElementById("btnVerMaisContatos");
+  var modal = document.getElementById("modalContatosCompleto");
+
+  if (filtrados.length === 0) {
+    lista.innerHTML = '<p class="detalhe">Nenhum contato encontrado.</p>';
+    btnVerMais.hidden = true;
+    if (estaFiltrando) contatosModalAberto = false;
+    modal.hidden = !contatosModalAberto;
+    if (contatosModalAberto) document.getElementById("listaContatosCompleta").innerHTML = "";
+    return;
+  }
+
+  var mostrarLiderNaLinha = usuario && usuario.role === "admin";
+  var somenteLeitura = usuario && usuario.role === "motorista";
+
+  if (estaFiltrando) {
+    // Buscando/filtrando: mostra tudo que bateu, sem esconder nada atrás do "ver mais".
+    contatosModalAberto = false;
+    modal.hidden = true;
+    lista.innerHTML = filtrados.map(function (c, idx) {
+      return renderContatoItem(c, idx, mostrarLiderNaLinha, somenteLeitura);
+    }).join("");
+    btnVerMais.hidden = true;
+  } else {
+    var primeiros = filtrados.slice(0, LIMITE_CONTATOS_RESUMO);
+    var resto = filtrados.slice(LIMITE_CONTATOS_RESUMO);
+
+    lista.innerHTML = primeiros.map(function (c, idx) {
+      return renderContatoItem(c, idx, mostrarLiderNaLinha, somenteLeitura);
+    }).join("");
+
+    btnVerMais.hidden = resto.length === 0;
+    btnVerMais.textContent = "Ver mais (" + resto.length + ")";
+
+    modal.hidden = !contatosModalAberto;
+    if (contatosModalAberto) {
+      document.getElementById("listaContatosCompleta").innerHTML = resto.length
+        ? resto.map(function (c, idx) { return renderContatoItem(c, idx, mostrarLiderNaLinha, somenteLeitura); }).join("")
+        : '<p class="detalhe">Nenhum outro contato.</p>';
+    }
+  }
 
   document.querySelectorAll(".btnEditar").forEach(function (el) {
     el.addEventListener("click", function () {
@@ -623,6 +660,14 @@ function renderLista() {
 }
 document.getElementById("busca").addEventListener("input", renderLista);
 document.getElementById("filtroLider").addEventListener("change", renderLista);
+document.getElementById("btnVerMaisContatos").addEventListener("click", function () {
+  contatosModalAberto = true;
+  renderLista();
+});
+document.getElementById("btnFecharModalContatos").addEventListener("click", function () {
+  contatosModalAberto = false;
+  renderLista();
+});
 
 // ---- Gráficos donut: por bairro e por local de votação (a partir da lista já carregada) ----
 var chartBairro = null;
