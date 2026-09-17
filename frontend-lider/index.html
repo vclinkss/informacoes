@@ -98,25 +98,30 @@
       <h2 class="titulo-secao titulo-secao--espacada">Agenda de compromissos</h2>
       <div class="grid-formularios">
         <section class="card atraso-1">
-          <h2 class="card-titulo">Novo compromisso</h2>
-          <div class="erro" id="erroAgenda"></div>
-          <label>Nome</label>
-          <input type="text" id="agendaNome" placeholder="Nome da pessoa" autocomplete="off" />
-          <div class="grid2">
-            <div>
-              <label>WhatsApp</label>
-              <input type="tel" id="agendaWhatsapp" placeholder="(96) 99999-9999" autocomplete="off" />
+          <button type="button" class="card-titulo-colapsavel" id="btnNovoCompromisso" aria-expanded="false">
+            <h2 class="card-titulo">Novo compromisso</h2>
+            <svg class="seta-colapso" id="setaNovoCompromisso" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="colapso-corpo" id="corpoNovoCompromisso" hidden>
+            <div class="erro" id="erroAgenda"></div>
+            <label>Nome</label>
+            <input type="text" id="agendaNome" placeholder="Nome da pessoa" autocomplete="off" />
+            <div class="grid2">
+              <div>
+                <label>WhatsApp</label>
+                <input type="tel" id="agendaWhatsapp" placeholder="(96) 99999-9999" autocomplete="off" />
+              </div>
+              <div>
+                <label>Data e hora</label>
+                <input type="datetime-local" id="agendaDataHora" />
+              </div>
             </div>
-            <div>
-              <label>Data e hora</label>
-              <input type="datetime-local" id="agendaDataHora" />
-            </div>
+            <label>Local</label>
+            <input type="text" id="agendaLocal" placeholder="Onde vai ser" autocomplete="off" />
+            <label>Observação</label>
+            <input type="text" id="agendaObservacao" placeholder="Opcional" autocomplete="off" />
+            <button type="button" id="salvarAgendamento">Salvar compromisso</button>
           </div>
-          <label>Local</label>
-          <input type="text" id="agendaLocal" placeholder="Onde vai ser" autocomplete="off" />
-          <label>Observação</label>
-          <input type="text" id="agendaObservacao" placeholder="Opcional" autocomplete="off" />
-          <button type="button" id="salvarAgendamento">Salvar compromisso</button>
         </section>
 
         <section class="card atraso-2">
@@ -195,48 +200,53 @@
       </section>
 
       <section class="card atraso-2" id="cardNovoContato">
-        <h2 class="card-titulo">Novo contato</h2>
-        <div class="erro" id="erro"></div>
-        <label>Nome completo</label>
-        <input type="text" id="nome" placeholder="Ana Silva" autocomplete="off" />
-        <div class="campo-com-busca">
-          <label>Endereço</label>
-          <input type="text" id="endereco" placeholder="Rua das Flores, 123" autocomplete="off" />
-          <div class="sugestoes-caixa" id="sugestoesEndereco" hidden></div>
-        </div>
-        <p class="detalhe">Se aparecer o endereço certo na lista, escolha ele — assim sua casa aparece certinha no mapa (opcional).</p>
-        <div class="grid2">
-          <div>
-            <label>Bairro</label>
-            <select id="bairro">
-              <option value="">Selecione o bairro...</option>
-            </select>
+        <button type="button" class="card-titulo-colapsavel" id="btnNovoContato" aria-expanded="false">
+          <h2 class="card-titulo">Novo contato</h2>
+          <svg class="seta-colapso" id="setaNovoContato" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="colapso-corpo" id="corpoNovoContato" hidden>
+          <div class="erro" id="erro"></div>
+          <label>Nome completo</label>
+          <input type="text" id="nome" placeholder="Ana Silva" autocomplete="off" />
+          <div class="campo-com-busca">
+            <label>Endereço</label>
+            <input type="text" id="endereco" placeholder="Rua das Flores, 123" autocomplete="off" />
+            <div class="sugestoes-caixa" id="sugestoesEndereco" hidden></div>
           </div>
-          <div>
-            <label>WhatsApp</label>
-            <input type="tel" id="whatsapp" placeholder="(96) 99999-9999" autocomplete="off" />
+          <p class="detalhe">Se aparecer o endereço certo na lista, escolha ele — assim sua casa aparece certinha no mapa (opcional).</p>
+          <div class="grid2">
+            <div>
+              <label>Bairro</label>
+              <select id="bairro">
+                <option value="">Selecione o bairro...</option>
+              </select>
+            </div>
+            <div>
+              <label>WhatsApp</label>
+              <input type="tel" id="whatsapp" placeholder="(96) 99999-9999" autocomplete="off" />
+            </div>
           </div>
-        </div>
-        <div class="campo-com-busca">
-          <label>Local de votação</label>
-          <input type="text" id="votacao" placeholder="Digite o nome da escola e escolha na lista" autocomplete="off" />
-          <div class="sugestoes-caixa" id="sugestoesVotacao" hidden></div>
-        </div>
-        <p class="detalhe" id="statusLocalizacao">Digite pelo menos 3 letras e escolha uma opção da lista — é obrigatório, pra garantir que o local fique exato.</p>
-        <div class="grid2">
-          <div>
-            <label>Zona eleitoral</label>
-            <input type="text" id="zona" placeholder="Ex.: 006" autocomplete="off" />
+          <div class="campo-com-busca">
+            <label>Local de votação</label>
+            <input type="text" id="votacao" placeholder="Digite o nome da escola e escolha na lista" autocomplete="off" />
+            <div class="sugestoes-caixa" id="sugestoesVotacao" hidden></div>
           </div>
-          <div>
-            <label>Seção eleitoral</label>
-            <input type="text" id="secao" placeholder="Ex.: 0106" autocomplete="off" />
+          <p class="detalhe" id="statusLocalizacao">Digite pelo menos 3 letras e escolha uma opção da lista — é obrigatório, pra garantir que o local fique exato.</p>
+          <div class="grid2">
+            <div>
+              <label>Zona eleitoral</label>
+              <input type="text" id="zona" placeholder="Ex.: 006" autocomplete="off" />
+            </div>
+            <div>
+              <label>Seção eleitoral</label>
+              <input type="text" id="secao" placeholder="Ex.: 0106" autocomplete="off" />
+            </div>
           </div>
+          <label class="checkbox-label">
+            <input type="checkbox" id="precisaCarona" checked />Vai precisar de carona no dia
+          </label>
+          <button type="button" id="salvar">Salvar contato</button>
         </div>
-        <label class="checkbox-label">
-          <input type="checkbox" id="precisaCarona" checked />Vai precisar de carona no dia
-        </label>
-        <button type="button" id="salvar">Salvar contato</button>
       </section>
     </div>
 

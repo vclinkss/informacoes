@@ -57,6 +57,38 @@ document.getElementById("abaBtnAgenda").addEventListener("click", function () {
   if (abaAtiva === "agenda") fecharAbas(); else mostrarAba("agenda");
 });
 
+// ---- Cards colapsáveis "Novo contato" / "Novo compromisso" (fica fechado até o usuário clicar, útil no celular) ----
+function alternarColapso(idBotao, idCorpo, idSeta) {
+  var corpo = document.getElementById(idCorpo);
+  var seta = document.getElementById(idSeta);
+  var botao = document.getElementById(idBotao);
+  var vaiAbrir = corpo.hidden;
+
+  if (vaiAbrir) {
+    corpo.hidden = false;
+    corpo.classList.remove("colapso-fechando");
+    corpo.classList.add("colapso-abrindo");
+    seta.classList.add("aberta");
+    botao.setAttribute("aria-expanded", "true");
+  } else {
+    corpo.classList.remove("colapso-abrindo");
+    corpo.classList.add("colapso-fechando");
+    seta.classList.remove("aberta");
+    botao.setAttribute("aria-expanded", "false");
+    setTimeout(function () {
+      corpo.hidden = true;
+      corpo.classList.remove("colapso-fechando");
+    }, ABA_ANIM_MS);
+  }
+}
+
+document.getElementById("btnNovoContato").addEventListener("click", function () {
+  alternarColapso("btnNovoContato", "corpoNovoContato", "setaNovoContato");
+});
+document.getElementById("btnNovoCompromisso").addEventListener("click", function () {
+  alternarColapso("btnNovoCompromisso", "corpoNovoCompromisso", "setaNovoCompromisso");
+});
+
 var CORES = ["#1F6E56", "#5DCAA5", "#0F6E56", "#9FE1CB", "#04342C", "#7F77DD", "#D85A30", "#534AB7"];
 
 // ---- Ícones (SVG inline, herdam a cor do texto via currentColor) ----

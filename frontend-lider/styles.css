@@ -86,6 +86,55 @@ body::after {
   animation: saidaAba 0.2s ease both;
 }
 
+.card-titulo-colapsavel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  box-shadow: none;
+  transition: none;
+}
+
+.card-titulo-colapsavel:hover,
+.card-titulo-colapsavel:active {
+  transform: none;
+  box-shadow: none;
+}
+
+.card-titulo-colapsavel .card-titulo {
+  margin: 0;
+}
+
+.seta-colapso {
+  color: var(--verde);
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.seta-colapso.aberta {
+  transform: rotate(180deg);
+}
+
+.colapso-corpo {
+  margin-top: 14px;
+}
+
+.colapso-corpo.colapso-abrindo {
+  animation: entrada 0.25s ease both;
+}
+
+.colapso-corpo.colapso-fechando {
+  animation: saidaAba 0.2s ease both;
+}
+
 .hero {
   animation: entrada 0.55s ease both;
 }

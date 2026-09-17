@@ -444,6 +444,18 @@ body::after {
   transform: rotate(180deg);
 }
 
+.colapso-corpo {
+  margin-top: 14px;
+}
+
+.colapso-corpo.colapso-abrindo {
+  animation: entrada 0.25s ease both;
+}
+
+.colapso-corpo.colapso-fechando {
+  animation: saidaAba 0.2s ease both;
+}
+
 .card-titulo::before {
   content: "";
   width: 5px;
