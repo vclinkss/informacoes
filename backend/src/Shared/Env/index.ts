@@ -16,6 +16,9 @@ const envSchema = z.object({
   // de contatos de líderes que não são deles). Nunca configurável por ninguém além
   // de quem tiver acesso a essa variável de ambiente no servidor.
   EMAIL_MASTER: z.string().trim().toLowerCase().default("lucassousarbr@gmail.com"),
+  // E-mail do líder cujos compromissos são a agenda do escritório da doutora
+  // (mostra o selo "Agenda do escritório" nesses itens da agenda).
+  EMAIL_AGENDA_ESCRITORIO: z.string().trim().toLowerCase().default("clepaiva.ap@hotmail.com"),
 });
 
 const parsed = envSchema.safeParse(process.env);

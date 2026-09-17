@@ -8,11 +8,13 @@ import {
   IAgendamentoRepository,
 } from "../../../Application/Contracts/Repositories/IAgendamentoRepository";
 import { Agendamento } from "../../../Domain/Agenda/Models/Agendamento";
+import { ehAgendaEscritorio } from "../../../Shared/ehAgendaEscritorio";
 
 type AgendamentoRow = {
   id: number;
   liderId: number;
   liderNome: string;
+  liderEmail: string | null;
   nome: string;
   whatsapp: string;
   dataHora: Date | null;
@@ -34,6 +36,7 @@ function toDomain(row: AgendamentoRow): Agendamento {
     observacao: row.observacao,
     concluido: row.concluido ?? false,
     criadoEm: row.criadoEm ?? undefined,
+    agendaEscritorio: ehAgendaEscritorio(row.liderEmail),
   });
 }
 
@@ -41,6 +44,7 @@ const agendamentoComLider = {
   id: agendamentoTable.id,
   liderId: agendamentoTable.liderId,
   liderNome: liderTable.nome,
+  liderEmail: liderTable.email,
   nome: agendamentoTable.nome,
   whatsapp: agendamentoTable.whatsapp,
   dataHora: agendamentoTable.dataHora,
@@ -64,7 +68,13 @@ export class DrizzleAgendamentoRepository implements IAgendamentoRepository {
       })
       .returning();
 
-    return toDomain({ ...row, liderNome: agendamento.liderNome ?? "" });
+    const [comLider] = await db
+      .select(agendamentoComLider)
+      .from(agendamentoTable)
+      .innerJoin(liderTable, eq(agendamentoTable.liderId, liderTable.id))
+      .where(eq(agendamentoTable.id, row.id));
+
+    return toDomain(comLider);
   }
 
   async findAll(filtro: AgendamentoFiltro = {}): Promise<Agendamento[]> {

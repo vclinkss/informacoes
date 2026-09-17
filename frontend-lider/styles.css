@@ -546,6 +546,16 @@ button:disabled {
   display: none;
 }
 
+.aviso-horario {
+  color: #8A6D1A;
+  font-size: 13px;
+  margin: -4px 0 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #F3EAD6;
+  border: 1px solid #E5CE9C;
+}
+
 .aviso {
   color: #8A6D1A;
   font-size: 13px;
@@ -710,6 +720,11 @@ button:disabled {
 .status-pill--nao {
   background: #F3EAD6;
   color: #8A6D1A;
+}
+
+.status-pill--escritorio {
+  background: #E7E4FA;
+  color: #4A3FA8;
 }
 
 .whatsapp-link {

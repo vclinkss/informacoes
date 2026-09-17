@@ -1262,6 +1262,22 @@ function paraInputDatetimeLocal(iso) {
   return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
 }
 
+// Avisa (sem bloquear) se o usuário já tem outro compromisso marcado exatamente nesse horário.
+function horarioJaMarcado(valorDatetimeLocal, idParaIgnorar) {
+  if (!valorDatetimeLocal || !usuario) return false;
+  var novoTempo = new Date(paraISOComOffset(valorDatetimeLocal)).getTime();
+  if (isNaN(novoTempo)) return false;
+  return agendamentos.some(function (a) {
+    if (idParaIgnorar && a.id === idParaIgnorar) return false;
+    if (a.liderId !== usuario.id || !a.dataHora) return false;
+    return new Date(a.dataHora).getTime() === novoTempo;
+  });
+}
+
+document.getElementById("agendaDataHora").addEventListener("change", function () {
+  document.getElementById("avisoHorarioAgenda").hidden = !horarioJaMarcado(this.value);
+});
+
 async function carregarAgenda() {
   var temAcesso = usuario && (usuario.role === "admin" || usuario.role === "agenda");
   if (!temAcesso) { document.getElementById("secaoAgenda").hidden = true; return; } // líder comum não tem acesso à agenda
@@ -1305,6 +1321,7 @@ var LIMITE_AGENDA_RESUMO = 3;
 function renderAgendaItem(a, vTudo) {
   if (editandoAgendaId === a.id) return renderCardAgendaEdicao(a);
   var quem = vTudo ? '<p class="detalhe">' + ICONE_USERS + "Cadastrado por " + escaparAtributo(a.liderNome) + "</p>" : "";
+  var seloEscritorio = a.agendaEscritorio ? '<span class="status-pill status-pill--escritorio">Agenda do escritório</span>' : "";
   var dataStr = formatarDataHora(a.dataHora);
   var linkWhatsAgenda = waLink(a.whatsapp);
   var telefoneAgendaHtml = linkWhatsAgenda
@@ -1317,7 +1334,7 @@ function renderAgendaItem(a, vTudo) {
     : '<button type="button" class="botao-pequeno btnConcluirAgenda" data-id="' + a.id + '">Visita concluída</button>';
   return (
     '<div class="agendamento-item" data-agenda-id="' + a.id + '">' +
-      '<p class="nome">' + escaparAtributo(a.nome || "(sem nome)") + "</p>" +
+      '<p class="nome">' + escaparAtributo(a.nome || "(sem nome)") + seloEscritorio + "</p>" +
       (a.local ? '<p class="detalhe">' + ICONE_PIN + escaparAtributo(a.local) + "</p>" : "") +
       '<p class="detalhe">' + ICONE_CALENDARIO + (dataStr || "Sem data definida") + "</p>" +
       (a.observacao ? '<p class="detalhe">Obs: ' + escaparAtributo(a.observacao) + "</p>" : "") +
@@ -1493,6 +1510,7 @@ document.getElementById("salvarAgendamento").addEventListener("click", async fun
 
   campos.concat(["agendaObservacao"]).forEach(function (id) { document.getElementById(id).value = ""; });
   limparErroEm("erroAgenda");
+  document.getElementById("avisoHorarioAgenda").hidden = true;
   await carregarAgenda();
 });
 

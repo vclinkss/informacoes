@@ -9,6 +9,7 @@ export type AgendamentoProps = {
   observacao?: string | null;
   concluido?: boolean;
   criadoEm?: Date;
+  agendaEscritorio?: boolean;
 };
 
 export class Agendamento {
@@ -22,6 +23,7 @@ export class Agendamento {
   readonly observacao: string | null;
   readonly concluido: boolean;
   readonly criadoEm?: Date;
+  readonly agendaEscritorio: boolean;
 
   constructor(props: AgendamentoProps) {
     this.id = props.id;
@@ -34,6 +36,7 @@ export class Agendamento {
     this.observacao = props.observacao ?? null;
     this.concluido = props.concluido ?? false;
     this.criadoEm = props.criadoEm;
+    this.agendaEscritorio = props.agendaEscritorio ?? false;
   }
 
   linkWhatsapp(): string | null {
