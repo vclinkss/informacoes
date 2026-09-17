@@ -1321,7 +1321,9 @@ var LIMITE_AGENDA_RESUMO = 3;
 function renderAgendaItem(a, vTudo) {
   if (editandoAgendaId === a.id) return renderCardAgendaEdicao(a);
   var quem = vTudo ? '<p class="detalhe">' + ICONE_USERS + "Cadastrado por " + escaparAtributo(a.liderNome) + "</p>" : "";
-  var seloEscritorio = a.agendaEscritorio ? '<span class="status-pill status-pill--escritorio">Agenda do escritório</span>' : "";
+  var seloEscritorio = a.agendaEscritorio
+    ? '<span class="status-pill status-pill--agenda status-pill--escritorio">Agenda do escritório</span>'
+    : '<span class="status-pill status-pill--agenda status-pill--politica">Agenda política</span>';
   var dataStr = formatarDataHora(a.dataHora);
   var linkWhatsAgenda = waLink(a.whatsapp);
   var telefoneAgendaHtml = linkWhatsAgenda

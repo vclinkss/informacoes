@@ -729,6 +729,16 @@ button:disabled {
   color: #4A3FA8;
 }
 
+.status-pill--politica {
+  background: #DDEBFB;
+  color: #1B5FA8;
+}
+
+.status-pill--agenda {
+  font-size: 12px;
+  padding: 3px 10px;
+}
+
 .whatsapp-link {
   display: inline-flex;
   align-items: center;
