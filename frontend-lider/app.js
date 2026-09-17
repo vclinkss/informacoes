@@ -1,6 +1,13 @@
 // ---- Configuração da API (backend/ nesta pasta, "npm run dev") ----
 const API_BASE_URL = "https://informacoes.onrender.com/api";
 
+// ---- PWA: registra o service worker (permite instalar no celular) ----
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("sw.js").catch(function () {});
+  });
+}
+
 // ---- Estado local ----
 var token = localStorage.getItem("token") || sessionStorage.getItem("token") || null;
 var usuario = null; // { id, nome, email, role, status }
