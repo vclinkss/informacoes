@@ -8,4 +8,5 @@ export interface ILiderRepository {
   findByStatus(status: LiderStatus): Promise<Lider[]>;
   updateStatus(id: number, status: LiderStatus): Promise<Lider | null>;
   updateRole(id: number, role: LiderRole): Promise<Lider | null>;
+  updateRestrito(id: number, restrito: boolean): Promise<Lider | null>;
 }

@@ -11,6 +11,7 @@ type LiderRow = {
   senhaHash: string;
   role: string;
   status: string;
+  restrito: boolean | null;
 };
 
 function toDomain(row: LiderRow): Lider {
@@ -20,7 +21,8 @@ function toDomain(row: LiderRow): Lider {
     row.senhaHash,
     row.role as LiderRole,
     row.status as LiderStatus,
-    row.id
+    row.id,
+    row.restrito ?? false
   );
 }
 
@@ -72,6 +74,15 @@ export class DrizzleLiderRepository implements ILiderRepository {
     const [row] = await db
       .update(liderTable)
       .set({ role })
+      .where(eq(liderTable.id, id))
+      .returning();
+    return row ? toDomain(row) : null;
+  }
+
+  async updateRestrito(id: number, restrito: boolean): Promise<Lider | null> {
+    const [row] = await db
+      .update(liderTable)
+      .set({ restrito })
       .where(eq(liderTable.id, id))
       .returning();
     return row ? toDomain(row) : null;

@@ -42,6 +42,9 @@ alter table lider add column if not exists senha_hash varchar(255);
 alter table lider add column if not exists role varchar(20) not null default 'lider';
 alter table lider add column if not exists status varchar(20) not null default 'pendente';
 alter table lider add column if not exists criado_em timestamptz default now();
+-- Admin "restrito" não vê os nomes dos contatos de outros líderes (só os próprios).
+-- Só o e-mail master (EMAIL_MASTER) consegue ligar/desligar essa restrição em outro admin.
+alter table lider add column if not exists restrito boolean not null default false;
 
 -- Nome não precisa mais ser único (quem identifica um líder de verdade é o e-mail).
 alter table lider drop constraint if exists lider_nome_key;

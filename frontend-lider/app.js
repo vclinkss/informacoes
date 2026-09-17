@@ -962,6 +962,7 @@ async function carregarPapeis() {
 
   var rotulos = { lider: "Líder", admin: "Admin", agenda: "Agenda", motorista: "Motorista" };
   document.getElementById("listaPapeis").innerHTML = aprovados.map(function (l) {
+    var mostrarRestrito = usuario.souMaster && l.role === "admin" && l.id !== usuario.id;
     return (
       '<div class="papel-item">' +
         '<div>' +
@@ -973,6 +974,12 @@ async function carregarPapeis() {
             return '<option value="' + r + '"' + (r === l.role ? " selected" : "") + ">" + rotulos[r] + "</option>";
           }).join("") +
         "</select>" +
+        (mostrarRestrito
+          ? '<label class="label-restrito">' +
+              '<input type="checkbox" class="checkboxRestrito" data-id="' + l.id + '"' + (l.restrito ? " checked" : "") + ">" +
+              "Não ver contatos de outros líderes" +
+            "</label>"
+          : "") +
       "</div>"
     );
   }).join("");
@@ -983,6 +990,17 @@ async function carregarPapeis() {
         await api("/lideres/" + el.dataset.id + "/role", { method: "PATCH", body: JSON.stringify({ role: el.value }) });
       } catch (e) {
         mostrarErro("Erro ao mudar papel: " + e.message);
+      }
+    });
+  });
+
+  document.querySelectorAll(".checkboxRestrito").forEach(function (el) {
+    el.addEventListener("change", async function () {
+      try {
+        await api("/lideres/" + el.dataset.id + "/restrito", { method: "PATCH", body: JSON.stringify({ restrito: el.checked }) });
+      } catch (e) {
+        el.checked = !el.checked;
+        mostrarErro("Erro ao mudar restrição: " + e.message);
       }
     });
   });

@@ -8,7 +8,14 @@ export class ListLideresController {
     try {
       const lideres = await this.useCase.execute();
       res.status(200).json(
-        lideres.map((l) => ({ id: l.id, nome: l.nome, email: l.email, role: l.role, status: l.status }))
+        lideres.map((l) => ({
+          id: l.id,
+          nome: l.nome,
+          email: l.email,
+          role: l.role,
+          status: l.status,
+          restrito: l.restrito,
+        }))
       );
     } catch (err) {
       next(err);

@@ -1,5 +1,6 @@
 import { DrizzleContatoRepository } from "../../../../Infrastructure/Database/Repositories/DrizzleContatoRepository";
 import { DrizzleGeoCacheRepository } from "../../../../Infrastructure/Database/Repositories/DrizzleGeoCacheRepository";
+import { DrizzleLiderRepository } from "../../../../Infrastructure/Database/Repositories/DrizzleLiderRepository";
 import { CreateContato } from "../../../../Application/Modules/Contatos/UseCases/CreateContato";
 import { ListContatos } from "../../../../Application/Modules/Contatos/UseCases/ListContatos";
 import { UpdateStatusLigacao } from "../../../../Application/Modules/Contatos/UseCases/UpdateStatusLigacao";
@@ -18,6 +19,7 @@ import { ModeloImportacaoExcelController } from "../../../../Presentation/Contro
 
 const contatoRepository = new DrizzleContatoRepository();
 const geoCacheRepository = new DrizzleGeoCacheRepository();
+const liderRepository = new DrizzleLiderRepository();
 
 export function makeCreateContatoController() {
   const useCase = new CreateContato(contatoRepository, geoCacheRepository);
@@ -36,7 +38,7 @@ export function makeDeleteContatoController() {
 
 export function makeListContatosController() {
   const useCase = new ListContatos(contatoRepository);
-  return new ListContatosController(useCase);
+  return new ListContatosController(useCase, liderRepository);
 }
 
 export function makeUpdateStatusLigacaoController() {
@@ -51,7 +53,7 @@ export function makeEstatisticasController() {
 
 export function makeExportarContatosExcelController() {
   const useCase = new ListContatos(contatoRepository);
-  return new ExportarContatosExcelController(useCase);
+  return new ExportarContatosExcelController(useCase, liderRepository);
 }
 
 export function makeImportarContatosExcelController() {

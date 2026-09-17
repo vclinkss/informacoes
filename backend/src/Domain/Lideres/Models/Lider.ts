@@ -8,7 +8,9 @@ export class Lider {
     public readonly senhaHash: string,
     public readonly role: LiderRole = "lider",
     public readonly status: LiderStatus = "pendente",
-    public readonly id?: number
+    public readonly id?: number,
+    /** Quando true (só o e-mail master pode ligar isso), esse admin não vê nomes/whatsapp de contatos de outros líderes. */
+    public readonly restrito: boolean = false
   ) {}
 
   static registrar(nome: string, email: string, senhaHash: string): Lider {

@@ -6,6 +6,7 @@ export type RotaTransporte = { bairro: string; localVotacao: string; total: numb
 export type PontoNomeado = { nome: string; lat: number; lng: number };
 export type PontoContato = {
   id: number;
+  liderId: number;
   nome: string;
   lat: number;
   lng: number;
@@ -92,6 +93,7 @@ export class ObterMapaLogistica {
       .filter((c) => c.enderecoLat !== null && c.enderecoLng !== null && c.id !== undefined)
       .map((c) => ({
         id: c.id as number,
+        liderId: c.liderId,
         nome: c.nome,
         lat: c.enderecoLat as number,
         lng: c.enderecoLng as number,

@@ -2,11 +2,20 @@ import { AppError } from "../../../Contracts/Errors/AppError";
 import { IHasher } from "../../../Contracts/Criptography/IHasher";
 import { IEncrypter } from "../../../Contracts/Criptography/IEncrypter";
 import { ILiderRepository } from "../../../Contracts/Repositories/ILiderRepository";
+import { ehMaster } from "../../../../Shared/ehMaster";
 
 export type LoginInput = { email: string; senha: string };
 export type LoginOutput = {
   token: string;
-  usuario: { id: number; nome: string; email: string; role: string; status: string };
+  usuario: {
+    id: number;
+    nome: string;
+    email: string;
+    role: string;
+    status: string;
+    restrito: boolean;
+    souMaster: boolean;
+  };
 };
 
 export class Login {
@@ -48,6 +57,8 @@ export class Login {
         email: lider.email,
         role: lider.role,
         status: lider.status,
+        restrito: lider.restrito,
+        souMaster: ehMaster(lider.email),
       },
     };
   }

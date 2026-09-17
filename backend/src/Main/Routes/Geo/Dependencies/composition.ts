@@ -1,5 +1,6 @@
 import { DrizzleContatoRepository } from "../../../../Infrastructure/Database/Repositories/DrizzleContatoRepository";
 import { DrizzleGeoCacheRepository } from "../../../../Infrastructure/Database/Repositories/DrizzleGeoCacheRepository";
+import { DrizzleLiderRepository } from "../../../../Infrastructure/Database/Repositories/DrizzleLiderRepository";
 import { NominatimGeocoder } from "../../../../Infrastructure/Geocoding/NominatimGeocoder";
 import { ObterMapaLogistica } from "../../../../Application/Modules/Geo/UseCases/ObterMapaLogistica";
 import { SalvarLocalizacaoManual } from "../../../../Application/Modules/Geo/UseCases/SalvarLocalizacaoManual";
@@ -12,6 +13,7 @@ import { BuscarLocaisController } from "../../../../Presentation/Controllers/Bus
 
 const contatoRepository = new DrizzleContatoRepository();
 const geoCacheRepository = new DrizzleGeoCacheRepository();
+const liderRepository = new DrizzleLiderRepository();
 
 // OpenStreetMap/Nominatim: gratuito, sem chave/cartão. (GoogleGeocoder.ts fica pronto no projeto
 // caso decidam ativar o faturamento do Google Maps no futuro.)
@@ -19,7 +21,7 @@ const geocoder = new NominatimGeocoder();
 
 export function makeMapaLogisticaController() {
   const useCase = new ObterMapaLogistica(contatoRepository, geoCacheRepository, geocoder);
-  return new MapaLogisticaController(useCase);
+  return new MapaLogisticaController(useCase, liderRepository);
 }
 
 export function makeSalvarLocalizacaoManualController() {

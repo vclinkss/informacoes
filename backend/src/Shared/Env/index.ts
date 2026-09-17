@@ -12,6 +12,10 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(1, "JWT_SECRET is required"),
   JWT_EXPIRES_IN: z.string().default("1d"),
   GOOGLE_MAPS_API_KEY: z.string().optional(),
+  // Único e-mail que pode restringir o que outros admins enxergam (esconder nomes
+  // de contatos de líderes que não são deles). Nunca configurável por ninguém além
+  // de quem tiver acesso a essa variável de ambiente no servidor.
+  EMAIL_MASTER: z.string().trim().toLowerCase().default("lucassousarbr@gmail.com"),
 });
 
 const parsed = envSchema.safeParse(process.env);

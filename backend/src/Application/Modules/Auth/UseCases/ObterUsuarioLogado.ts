@@ -1,5 +1,6 @@
 import { AppError } from "../../../Contracts/Errors/AppError";
 import { ILiderRepository } from "../../../Contracts/Repositories/ILiderRepository";
+import { ehMaster } from "../../../../Shared/ehMaster";
 
 export class ObterUsuarioLogado {
   constructor(private readonly liderRepository: ILiderRepository) {}
@@ -13,6 +14,8 @@ export class ObterUsuarioLogado {
       email: lider.email,
       role: lider.role,
       status: lider.status,
+      restrito: lider.restrito,
+      souMaster: ehMaster(lider.email),
     };
   }
 }
