@@ -14,6 +14,7 @@ import { UpdateContatoController } from "../../../../Presentation/Controllers/Up
 import { DeleteContatoController } from "../../../../Presentation/Controllers/DeleteContatoController";
 import { EstatisticasController } from "../../../../Presentation/Controllers/EstatisticasController";
 import { ExportarContatosExcelController } from "../../../../Presentation/Controllers/ExportarContatosExcelController";
+import { ExportarContatosWordController } from "../../../../Presentation/Controllers/ExportarContatosWordController";
 import { ImportarContatosExcelController } from "../../../../Presentation/Controllers/ImportarContatosExcelController";
 import { ModeloImportacaoExcelController } from "../../../../Presentation/Controllers/ModeloImportacaoExcelController";
 
@@ -54,6 +55,11 @@ export function makeEstatisticasController() {
 export function makeExportarContatosExcelController() {
   const useCase = new ListContatos(contatoRepository);
   return new ExportarContatosExcelController(useCase, liderRepository);
+}
+
+export function makeExportarContatosWordController() {
+  const useCase = new ListContatos(contatoRepository);
+  return new ExportarContatosWordController(useCase, liderRepository);
 }
 
 export function makeImportarContatosExcelController() {

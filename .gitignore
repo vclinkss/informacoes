@@ -14,3 +14,12 @@ backend/scripts/fix_colisoes.py
 
 relatorios/__pycache__/
 relatorios/*.pyc
+
+# Dados reais de eleitores/líderes: NUNCA subir pro GitHub (o repositório é público)
+/backups/
+relatorios/*.json
+relatorios/*.xlsx
+relatorios/*.docx
+relatorios/*.pdf
+relatorios/*.png
+~$*

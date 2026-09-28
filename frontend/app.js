@@ -431,8 +431,21 @@ function animarNumero(elId, valorFinal) {
 }
 
 async function renderStats() {
-  animarNumero("statTotal", contatos.length);
-  animarNumero("statLigados", contatos.filter(function (c) { return c.liguei; }).length);
+  // Com um líder selecionado no filtro, os números mostram só os contatos dele.
+  var liderFiltroEl = document.getElementById("filtroLider");
+  var liderFiltro = liderFiltroEl ? liderFiltroEl.value : "";
+  var base = liderFiltro
+    ? contatos.filter(function (c) { return String(c.liderId) === liderFiltro; })
+    : contatos;
+  var totalLabel = document.getElementById("statTotalLabel");
+  if (liderFiltro) {
+    totalLabel.textContent = "Contatos de " + liderFiltroEl.options[liderFiltroEl.selectedIndex].text;
+  } else if (usuario) {
+    var vTudo = usuario.role === "admin" || usuario.role === "motorista";
+    totalLabel.textContent = vTudo ? "Contatos cadastrados" : "Meus contatos";
+  }
+  animarNumero("statTotal", base.length);
+  animarNumero("statLigados", base.filter(function (c) { return c.liguei; }).length);
 
   if (usuario && usuario.role === "admin") {
     document.getElementById("statTerceiroLabel").textContent = "Líderes ativos";
@@ -762,7 +775,10 @@ function renderLista() {
   });
 }
 document.getElementById("busca").addEventListener("input", renderLista);
-document.getElementById("filtroLider").addEventListener("change", renderLista);
+document.getElementById("filtroLider").addEventListener("change", function () {
+  renderLista();
+  renderStats();
+});
 document.getElementById("btnVerMaisContatos").addEventListener("click", function () {
   contatosModalAberto = true;
   renderLista();
@@ -772,13 +788,12 @@ document.getElementById("btnFecharModalContatos").addEventListener("click", func
   renderLista();
 });
 
-// ---- Exportar lista de contatos pra Excel (.xlsx) ----
-document.getElementById("btnExportarExcel").addEventListener("click", async function () {
-  var botao = this;
+// ---- Exportar lista de contatos pra Excel (.xlsx) ou Word (.docx) ----
+async function exportarContatos(botao, rota, extensao) {
   var liderFiltroEl = document.getElementById("filtroLider");
   var liderFiltro = liderFiltroEl ? liderFiltroEl.value : "";
 
-  var caminho = "/contatos/exportar" + (liderFiltro ? "?liderId=" + encodeURIComponent(liderFiltro) : "");
+  var caminho = rota + (liderFiltro ? "?liderId=" + encodeURIComponent(liderFiltro) : "");
 
   botao.disabled = true;
   var textoOriginal = botao.textContent;
@@ -789,7 +804,7 @@ document.getElementById("btnExportarExcel").addEventListener("click", async func
     });
     if (!resposta.ok) {
       var corpo = await resposta.json().catch(function () { return {}; });
-      throw new Error(corpo.error || "Erro ao gerar planilha (" + resposta.status + ")");
+      throw new Error(corpo.error || "Erro ao gerar arquivo (" + resposta.status + ")");
     }
     var blob = await resposta.blob();
     var url = URL.createObjectURL(blob);
@@ -798,7 +813,7 @@ document.getElementById("btnExportarExcel").addEventListener("click", async func
 
     var hoje = new Date();
     var pad = function (n) { return String(n).padStart(2, "0"); };
-    link.download = "contatos-" + hoje.getFullYear() + "-" + pad(hoje.getMonth() + 1) + "-" + pad(hoje.getDate()) + ".xlsx";
+    link.download = "contatos-" + hoje.getFullYear() + "-" + pad(hoje.getMonth() + 1) + "-" + pad(hoje.getDate()) + "." + extensao;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -809,6 +824,12 @@ document.getElementById("btnExportarExcel").addEventListener("click", async func
     botao.disabled = false;
     botao.textContent = textoOriginal;
   }
+}
+document.getElementById("btnExportarExcel").addEventListener("click", function () {
+  exportarContatos(this, "/contatos/exportar", "xlsx");
+});
+document.getElementById("btnExportarWord").addEventListener("click", function () {
+  exportarContatos(this, "/contatos/exportar-word", "docx");
 });
 
 // ---- Baixar modelo de planilha pra importação ----

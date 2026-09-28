@@ -1,4 +1,4 @@
-const CACHE_NAME = "painel-equipe-v1";
+const CACHE_NAME = "painel-equipe-v2";
 const ARQUIVOS_APP_SHELL = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.json"];
 
 self.addEventListener("install", function (event) {
@@ -19,23 +19,21 @@ self.addEventListener("activate", function (event) {
 
 // Só cuida do "app shell" (HTML/CSS/JS deste site). Chamadas pra API e CDNs externos
 // passam direto pra rede, sem cache, pra nunca mostrar dados desatualizados.
+// Rede primeiro: sempre pega a versão nova do site; o cache só é usado sem internet.
 self.addEventListener("fetch", function (event) {
   const req = event.request;
   if (req.method !== "GET" || new URL(req.url).origin !== self.location.origin) {
     return;
   }
   event.respondWith(
-    caches.match(req).then(function (cached) {
-      const buscaNaRede = fetch(req)
-        .then(function (resp) {
-          if (resp && resp.status === 200) {
-            const copia = resp.clone();
-            caches.open(CACHE_NAME).then(function (cache) { cache.put(req, copia); });
-          }
-          return resp;
-        })
-        .catch(function () { return cached; });
-      return cached || buscaNaRede;
-    })
+    fetch(req)
+      .then(function (resp) {
+        if (resp && resp.status === 200) {
+          const copia = resp.clone();
+          caches.open(CACHE_NAME).then(function (cache) { cache.put(req, copia); });
+        }
+        return resp;
+      })
+      .catch(function () { return caches.match(req); })
   );
 });

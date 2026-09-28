@@ -19,6 +19,7 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
+    "docx": "^9.8.1",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.30.10",
     "exceljs": "^4.4.0",

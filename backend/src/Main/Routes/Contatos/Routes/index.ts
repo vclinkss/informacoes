@@ -7,6 +7,7 @@ import {
   makeDeleteContatoController,
   makeEstatisticasController,
   makeExportarContatosExcelController,
+  makeExportarContatosWordController,
   makeImportarContatosExcelController,
   makeListContatosController,
   makeModeloImportacaoExcelController,
@@ -27,6 +28,7 @@ const updateContatoController = makeUpdateContatoController();
 const deleteContatoController = makeDeleteContatoController();
 const estatisticasController = makeEstatisticasController();
 const exportarContatosExcelController = makeExportarContatosExcelController();
+const exportarContatosWordController = makeExportarContatosWordController();
 const importarContatosExcelController = makeImportarContatosExcelController();
 const modeloImportacaoExcelController = makeModeloImportacaoExcelController();
 
@@ -37,6 +39,9 @@ contatosRouter.get("/estatisticas", (req, res, next) =>
 );
 contatosRouter.get("/exportar", (req, res, next) =>
   exportarContatosExcelController.handle(req, res, next)
+);
+contatosRouter.get("/exportar-word", (req, res, next) =>
+  exportarContatosWordController.handle(req, res, next)
 );
 contatosRouter.get("/modelo-importacao", (req, res, next) =>
   modeloImportacaoExcelController.handle(req, res, next)
