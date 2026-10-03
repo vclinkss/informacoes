@@ -1367,3 +1367,13 @@ button:disabled {
 body.sem-rolagem {
   overflow: hidden;
 }
+
+.total-tre {
+  color: #8A5A00;
+  font-weight: 700;
+}
+
+#cardLogistica.tela-cheia:fullscreen {
+  width: 100%;
+  height: 100%;
+}

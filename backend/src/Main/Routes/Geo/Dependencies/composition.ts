@@ -6,10 +6,12 @@ import { ObterMapaLogistica } from "../../../../Application/Modules/Geo/UseCases
 import { SalvarLocalizacaoManual } from "../../../../Application/Modules/Geo/UseCases/SalvarLocalizacaoManual";
 import { ListarSugestoes } from "../../../../Application/Modules/Geo/UseCases/ListarSugestoes";
 import { BuscarLocais } from "../../../../Application/Modules/Geo/UseCases/BuscarLocais";
+import { ContarPorSecao } from "../../../../Application/Modules/Geo/UseCases/ContarPorSecao";
 import { MapaLogisticaController } from "../../../../Presentation/Controllers/MapaLogisticaController";
 import { SalvarLocalizacaoManualController } from "../../../../Presentation/Controllers/SalvarLocalizacaoManualController";
 import { ListarSugestoesController } from "../../../../Presentation/Controllers/ListarSugestoesController";
 import { BuscarLocaisController } from "../../../../Presentation/Controllers/BuscarLocaisController";
+import { ContagemSecoesController } from "../../../../Presentation/Controllers/ContagemSecoesController";
 
 const contatoRepository = new DrizzleContatoRepository();
 const geoCacheRepository = new DrizzleGeoCacheRepository();
@@ -37,4 +39,8 @@ export function makeListarSugestoesController() {
 export function makeBuscarLocaisController() {
   const useCase = new BuscarLocais(geocoder);
   return new BuscarLocaisController(useCase);
+}
+
+export function makeContagemSecoesController() {
+  return new ContagemSecoesController(new ContarPorSecao(contatoRepository));
 }

@@ -1090,6 +1090,7 @@ async function carregarLogistica() {
     return;
   }
   renderLogistica();
+  carregarContagemTre();
 }
 
 // Coordenada salva errada (endereço achado em outro estado) estica o mapa pro Brasil inteiro.
@@ -1098,19 +1099,40 @@ function dentroDoAmapa(lat, lng) {
   return lat >= -1.5 && lat <= 4.6 && lng >= -55 && lng <= -49.5;
 }
 
-// Tela cheia por CSS (o card do mapa ocupa a tela toda): funciona também no iPhone,
-// onde a API de fullscreen do navegador não vale pra elementos comuns.
+// Tela cheia: usa a tela cheia de verdade do navegador quando existe e, junto, leva o card do
+// mapa pro <body> com position:fixed — o card ficava preso dentro de um container animado, e no
+// iPhone (sem fullscreen pra elementos comuns) o CSS sozinho já cobre a tela toda.
+var marcadorPosicaoCard = null;
+
 function alternarTelaCheia(ligar) {
   var card = document.getElementById("cardLogistica");
   var ativo = typeof ligar === "boolean" ? ligar : !card.classList.contains("tela-cheia");
-  card.classList.toggle("tela-cheia", ativo);
+  if (ativo === card.classList.contains("tela-cheia")) return;
+
+  if (ativo) {
+    marcadorPosicaoCard = document.createComment("posicao-cardLogistica");
+    card.parentNode.insertBefore(marcadorPosicaoCard, card);
+    document.body.appendChild(card);
+    card.classList.add("tela-cheia");
+    if (card.requestFullscreen) card.requestFullscreen().catch(function () {});
+  } else {
+    card.classList.remove("tela-cheia");
+    if (marcadorPosicaoCard) {
+      marcadorPosicaoCard.parentNode.insertBefore(card, marcadorPosicaoCard);
+      marcadorPosicaoCard.remove();
+      marcadorPosicaoCard = null;
+    }
+    if (document.fullscreenElement) document.exitFullscreen().catch(function () {});
+  }
+
   document.body.classList.toggle("sem-rolagem", ativo);
   var botao = document.querySelector(".botao-tela-cheia");
   if (botao) {
     botao.textContent = ativo ? "✕ Sair da tela cheia" : "⛶ Tela cheia";
     botao.title = ativo ? "Sair da tela cheia (Esc)" : "Ver o mapa em tela cheia";
   }
-  setTimeout(function () { mapaLeaflet.invalidateSize(); }, 50);
+  setTimeout(function () { mapaLeaflet.invalidateSize(); }, 80);
+  setTimeout(function () { mapaLeaflet.invalidateSize(); }, 400);
 }
 
 function adicionarBotaoTelaCheia() {
@@ -1128,9 +1150,11 @@ function adicionarBotaoTelaCheia() {
   });
   mapaLeaflet.addControl(new Controle());
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && document.getElementById("cardLogistica").classList.contains("tela-cheia")) {
-      alternarTelaCheia(false);
-    }
+    if (e.key === "Escape") alternarTelaCheia(false);
+  });
+  // Esc na tela cheia nativa sai dela sem passar pelo keydown: acompanha aqui também.
+  document.addEventListener("fullscreenchange", function () {
+    if (!document.fullscreenElement) alternarTelaCheia(false);
   });
 }
 
@@ -1266,6 +1290,7 @@ function renderLogistica() {
 var locaisTre = null;
 var camadaLocaisTre = null;
 var marcadoresTre = [];
+var totaisTre = {}; // índice do local -> quantos contatos nossos votam lá (pela zona/seção)
 
 function normalizarBusca(texto) {
   return String(texto || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
@@ -1289,11 +1314,8 @@ function carregarLocaisTre() {
       fillOpacity: 1,
       dashArray: aproximado ? "2,2" : null,
     });
-    marcador.bindTooltip(
-      "<strong>" + escaparAtributo(l.n) + "</strong><br>Zona " + l.z + " · " + l.s.length + " seç" + (l.s.length === 1 ? "ão" : "ões"),
-      { direction: "top", offset: [0, -4] }
-    );
-    marcador.bindPopup(popupLocalTre(l), { maxWidth: 300 });
+    marcador.bindTooltip(tooltipLocalTre(l, 0), { direction: "top", offset: [0, -4] });
+    marcador.bindPopup(popupLocalTre(l, 0), { maxWidth: 300 });
     return marcador;
   });
 
@@ -1310,13 +1332,56 @@ function carregarLocaisTre() {
   filtrarLocaisTre(false);
 }
 
-function popupLocalTre(l) {
+function textoTotalTre(total) {
+  return total ? total + (total === 1 ? " pessoa nossa vota aqui" : " pessoas nossas votam aqui") : "";
+}
+
+function tooltipLocalTre(l, total) {
+  return (
+    "<strong>" + escaparAtributo(l.n) + "</strong><br>Zona " + l.z + " · " + l.s.length + " seç" + (l.s.length === 1 ? "ão" : "ões") +
+    (total ? '<br><b class="total-tre">' + textoTotalTre(total) + "</b>" : "")
+  );
+}
+
+// Busca quantos contatos votam em cada zona/seção (só números) e pinta as escolas com gente nossa.
+async function carregarContagemTre() {
+  if (!locaisTre) return;
+  var contagem;
+  try {
+    contagem = await api("/geo/contagem-secoes");
+  } catch (e) {
+    return;
+  }
+  var indice = {};
+  locaisTre.forEach(function (l, i) {
+    l.s.forEach(function (secao) { indice[l.z + "/" + secao] = i; });
+  });
+  totaisTre = {};
+  contagem.forEach(function (c) {
+    var i = indice[c.zona + "/" + c.secao];
+    if (i !== undefined) totaisTre[i] = (totaisTre[i] || 0) + c.total;
+  });
+  marcadoresTre.forEach(function (marcador, i) {
+    var l = locaisTre[i];
+    var total = totaisTre[i] || 0;
+    marcador.setTooltipContent(tooltipLocalTre(l, total));
+    marcador.setPopupContent(popupLocalTre(l, total));
+    if (total) {
+      marcador.setStyle({ fillColor: "#F2C94C", color: "#0F3D30" });
+      marcador.setRadius(Math.min(14, 6 + Math.sqrt(total) * 1.6));
+    }
+  });
+  filtrarLocaisTre(false);
+}
+
+function popupLocalTre(l, total) {
   var rotulosPrecisao = { rua: "rua do endereço", bairro: "bairro/localidade", cidade: "centro do município" };
   return (
     '<div class="pin-popup popup-tre">' +
     "<strong>" + escaparAtributo(l.n) + "</strong>" +
     '<div class="detalhe">' + escaparAtributo(l.e) + " · " + escaparAtributo(l.m) + "</div>" +
     '<div class="popup-tre-linha"><b>Zona ' + l.z + "</b> · local " + l.c + " · " + l.el.toLocaleString("pt-BR") + " eleitores</div>" +
+    (total ? '<div class="popup-tre-linha total-tre">' + textoTotalTre(total) + "</div>" : "") +
     '<div class="popup-tre-secoes"><b>Seções (' + l.s.length + "):</b> " + l.s.join(", ") + "</div>" +
     (l.o ? '<div class="popup-tre-aviso">' + escaparAtributo(l.o) + "</div>" : "") +
     (l.p !== "escola" ? '<div class="popup-tre-aviso">Localização aproximada (' + rotulosPrecisao[l.p] + ")</div>" : "") +
@@ -1394,6 +1459,7 @@ function filtrarLocaisTre(aproximar) {
         '<button type="button" class="resultado-local" data-idx="' + i + '">' +
         "<strong>" + escaparAtributo(l.n) + "</strong>" +
         "<span>" + escaparAtributo(l.m) + " · Zona " + l.z +
+        (totaisTre[i] ? " · <b>" + textoTotalTre(totaisTre[i]) + "</b>" : "") +
         (filtro.secao ? " · <b>Seção " + filtro.secao + "</b>" : " · " + l.s.length + " seç" + (l.s.length === 1 ? "ão" : "ões")) +
         "</span></button>"
       );
@@ -1791,7 +1857,7 @@ async function iniciarApp() {
     document.getElementById("navAbas").hidden = true;
     document.getElementById("secaoAgenda").hidden = true;
     document.getElementById("secaoOperacional").hidden = false;
-    ["blocoContatos", "blocoGraficos", "configCarros", "blocoTabelaLogistica", "avisoNaoLocalizados"].forEach(function (id) {
+    ["blocoContatos", "blocoGraficos", "avisoNaoLocalizados"].forEach(function (id) {
       document.getElementById(id).hidden = true;
     });
     document.getElementById("tituloLogistica").textContent = "Mapa dos locais de votação";

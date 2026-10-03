@@ -1,4 +1,4 @@
-const CACHE_NAME = "painel-equipe-v3";
+const CACHE_NAME = "painel-equipe-v4";
 const ARQUIVOS_APP_SHELL = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.json"];
 
 self.addEventListener("install", function (event) {
@@ -25,8 +25,10 @@ self.addEventListener("fetch", function (event) {
   if (req.method !== "GET" || new URL(req.url).origin !== self.location.origin) {
     return;
   }
+  // cache: "no-cache" obriga a conferir com o servidor — sem isso o navegador às vezes
+  // entregava um styles.css antigo guardado no próprio cache HTTP.
   event.respondWith(
-    fetch(req)
+    fetch(req, { cache: "no-cache" })
       .then(function (resp) {
         if (resp && resp.status === 200) {
           const copia = resp.clone();
