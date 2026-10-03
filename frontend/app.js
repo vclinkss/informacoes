@@ -2,9 +2,20 @@
 const API_BASE_URL = "https://informacoes.onrender.com/api";
 
 // ---- PWA: registra o service worker (permite instalar no celular) ----
+// Quando sai versão nova do site, o service worker novo assume e a página recarrega sozinha
+// (antes o app instalado no celular ficava preso na versão antiga até fechar e abrir várias vezes).
 if ("serviceWorker" in navigator) {
+  var jaTinhaServiceWorker = !!navigator.serviceWorker.controller;
+  var recarregouPorAtualizacao = false;
+  navigator.serviceWorker.addEventListener("controllerchange", function () {
+    if (!jaTinhaServiceWorker || recarregouPorAtualizacao) return;
+    recarregouPorAtualizacao = true;
+    window.location.reload();
+  });
   window.addEventListener("load", function () {
-    navigator.serviceWorker.register("sw.js").catch(function () {});
+    navigator.serviceWorker.register("sw.js", { updateViaCache: "none" })
+      .then(function (reg) { reg.update().catch(function () {}); })
+      .catch(function () {});
   });
 }
 
@@ -1292,6 +1303,7 @@ function renderLogistica() {
 var locaisTre = null;
 var camadaLocaisTre = null;
 var marcadoresTre = [];
+var tentativasContagemTre = 0;
 var totaisTre = {}; // índice do local -> { total, carona }: contatos nossos que votam lá (pela zona/seção)
 
 function normalizarBusca(texto) {
@@ -1363,8 +1375,12 @@ async function carregarContagemTre() {
   try {
     contagem = await api("/geo/contagem-secoes");
   } catch (e) {
+    // Internet fraca no celular: tenta de novo algumas vezes antes de desistir.
+    tentativasContagemTre += 1;
+    if (tentativasContagemTre <= 3) setTimeout(carregarContagemTre, 4000 * tentativasContagemTre);
     return;
   }
+  tentativasContagemTre = 0;
   var indice = {};
   locaisTre.forEach(function (l, i) {
     l.s.forEach(function (secao) { indice[l.z + "/" + secao] = i; });

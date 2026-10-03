@@ -1,4 +1,4 @@
-const CACHE_NAME = "painel-equipe-v4";
+const CACHE_NAME = "painel-equipe-v5";
 const ARQUIVOS_APP_SHELL = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.json"];
 
 self.addEventListener("install", function (event) {
