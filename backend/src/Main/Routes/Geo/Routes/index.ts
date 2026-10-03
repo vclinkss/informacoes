@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { authMiddleware } from "../../../../Presentation/Middlewares/auth";
+import { requireNaoMapa } from "../../../../Presentation/Middlewares/requireNaoMapa";
 import { requireNaoMotorista } from "../../../../Presentation/Middlewares/requireNaoMotorista";
 import {
   makeBuscarLocaisController,
@@ -18,6 +19,6 @@ const listarSugestoesController = makeListarSugestoesController();
 const buscarLocaisController = makeBuscarLocaisController();
 
 geoRouter.get("/mapa", (req, res, next) => mapaLogisticaController.handle(req, res, next));
-geoRouter.put("/local", requireNaoMotorista, (req, res, next) => salvarLocalizacaoManualController.handle(req, res, next));
+geoRouter.put("/local", requireNaoMotorista, requireNaoMapa,(req, res, next) => salvarLocalizacaoManualController.handle(req, res, next));
 geoRouter.get("/sugestoes", (req, res, next) => listarSugestoesController.handle(req, res, next));
 geoRouter.get("/buscar", (req, res, next) => buscarLocaisController.handle(req, res, next));

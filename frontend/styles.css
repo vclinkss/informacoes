@@ -1312,3 +1312,58 @@ button:disabled {
     font-size: 9.5px;
   }
 }
+
+/* ---- Mapa em tela cheia ---- */
+.botao-tela-cheia {
+  background: #fff;
+  color: var(--verde-escuro);
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.botao-tela-cheia:hover {
+  background: #F0F8F4;
+  transform: none;
+}
+
+#cardLogistica.tela-cheia {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  margin: 0;
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  background: #fff;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+#cardLogistica.tela-cheia .mapa-logistica {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+  margin-bottom: 0;
+}
+
+#cardLogistica.tela-cheia #configCarros,
+#cardLogistica.tela-cheia #resumoLogistica,
+#cardLogistica.tela-cheia #avisoNaoLocalizados,
+#cardLogistica.tela-cheia #blocoTabelaLogistica {
+  display: none;
+}
+
+#cardLogistica.tela-cheia .resultados-locais {
+  max-height: 30vh;
+  flex: 0 0 auto;
+}
+
+body.sem-rolagem {
+  overflow: hidden;
+}

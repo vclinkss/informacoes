@@ -7,7 +7,7 @@ const paramsSchema = z.object({
 });
 
 const bodySchema = z.object({
-  role: z.enum(["lider", "admin", "agenda", "motorista"]),
+  role: z.enum(["lider", "admin", "agenda", "motorista", "mapa"]),
 });
 
 export class AtualizarPapelLiderController {

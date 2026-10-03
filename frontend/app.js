@@ -1017,7 +1017,7 @@ async function carregarPapeis() {
   if (!aprovados.length) { card.hidden = true; return; }
   card.hidden = false;
 
-  var rotulos = { lider: "Líder", admin: "Admin", agenda: "Agenda", motorista: "Motorista" };
+  var rotulos = { lider: "Líder", admin: "Admin", agenda: "Agenda", motorista: "Motorista", mapa: "Só mapa" };
   document.getElementById("listaPapeis").innerHTML = aprovados.map(function (l) {
     var mostrarRestrito = usuario.souMaster && l.role === "admin" && l.id !== usuario.id;
     return (
@@ -1092,10 +1092,56 @@ async function carregarLogistica() {
   renderLogistica();
 }
 
+// Coordenada salva errada (endereço achado em outro estado) estica o mapa pro Brasil inteiro.
+// Tudo o que o mapa mostra é do Amapá, então o que cair fora daqui é ignorado.
+function dentroDoAmapa(lat, lng) {
+  return lat >= -1.5 && lat <= 4.6 && lng >= -55 && lng <= -49.5;
+}
+
+// Tela cheia por CSS (o card do mapa ocupa a tela toda): funciona também no iPhone,
+// onde a API de fullscreen do navegador não vale pra elementos comuns.
+function alternarTelaCheia(ligar) {
+  var card = document.getElementById("cardLogistica");
+  var ativo = typeof ligar === "boolean" ? ligar : !card.classList.contains("tela-cheia");
+  card.classList.toggle("tela-cheia", ativo);
+  document.body.classList.toggle("sem-rolagem", ativo);
+  var botao = document.querySelector(".botao-tela-cheia");
+  if (botao) {
+    botao.textContent = ativo ? "✕ Sair da tela cheia" : "⛶ Tela cheia";
+    botao.title = ativo ? "Sair da tela cheia (Esc)" : "Ver o mapa em tela cheia";
+  }
+  setTimeout(function () { mapaLeaflet.invalidateSize(); }, 50);
+}
+
+function adicionarBotaoTelaCheia() {
+  var Controle = L.Control.extend({
+    options: { position: "topright" },
+    onAdd: function () {
+      var botao = L.DomUtil.create("button", "botao-tela-cheia");
+      botao.type = "button";
+      botao.textContent = "⛶ Tela cheia";
+      botao.title = "Ver o mapa em tela cheia";
+      L.DomEvent.disableClickPropagation(botao);
+      L.DomEvent.on(botao, "click", function () { alternarTelaCheia(); });
+      return botao;
+    },
+  });
+  mapaLeaflet.addControl(new Controle());
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && document.getElementById("cardLogistica").classList.contains("tela-cheia")) {
+      alternarTelaCheia(false);
+    }
+  });
+}
+
 function popupComCorrecao(titulo, nome, tipo) {
+  // Motorista e "mapa" só visualizam: sem botão de corrigir (a API recusaria).
+  var somenteLeitura = usuario && (usuario.role === "motorista" || usuario.role === "mapa");
   return (
     '<div class="pin-popup"><strong>' + escaparAtributo(titulo) + "</strong><br>" + escaparAtributo(nome) +
-    '<br><button type="button" class="botao-pequeno btnCorrigirPopup" data-nome="' + escaparAtributo(nome) + '" data-tipo="' + tipo + '">Corrigir localização</button></div>'
+    (somenteLeitura ? "" :
+      '<br><button type="button" class="botao-pequeno btnCorrigirPopup" data-nome="' + escaparAtributo(nome) + '" data-tipo="' + tipo + '">Corrigir localização</button>') +
+    "</div>"
   );
 }
 
@@ -1151,6 +1197,8 @@ function renderLogistica() {
       maxZoom: 19,
     }).addTo(mapaLeaflet);
 
+    adicionarBotaoTelaCheia();
+
     // Delega o clique do botão "Corrigir localização" de dentro de qualquer popup do mapa
     mapaLeaflet.on("popupopen", function (e) {
       var el = e.popup.getElement();
@@ -1174,6 +1222,7 @@ function renderLogistica() {
   // manual, via botão "Corrigir no mapa" na lista de não localizados), mas não desenha mais no mapa
   // o ponto/linha "média do bairro" — só os locais de votação e as pessoas de verdade.
   dados.locaisVotacao.forEach(function (p) {
+    if (!dentroDoAmapa(p.lat, p.lng)) return;
     bounds.push([p.lat, p.lng]);
     L.circleMarker([p.lat, p.lng], { radius: 8, color: "#0F3D30", fillColor: "#E9D9A4", fillOpacity: 0.95, weight: 2 })
       .bindPopup(popupComCorrecao("Local de votação", p.nome, "votacao"))
@@ -1181,6 +1230,7 @@ function renderLogistica() {
   });
 
   (dados.contatos || []).forEach(function (c) {
+    if (!dentroDoAmapa(c.lat, c.lng)) return;
     bounds.push([c.lat, c.lng]);
     var pillTexto = c.liguei ? "Ligou" : "Pendente";
     L.circleMarker([c.lat, c.lng], { radius: 5, color: "#0F3D30", fillColor: "#7F77DD", fillOpacity: 0.9, weight: 1.5 })
@@ -1192,7 +1242,7 @@ function renderLogistica() {
 
     // Linha fina da casa exata da pessoa até a escola dela.
     var destino = pontosLocal[c.localVotacao];
-    if (destino) {
+    if (destino && dentroDoAmapa(destino.lat, destino.lng)) {
       L.polyline([[c.lat, c.lng], [destino.lat, destino.lng]], {
         color: "#534AB7",
         weight: 2,
@@ -1732,8 +1782,23 @@ async function iniciarApp() {
     return;
   }
 
-  var rotulosPapel = { admin: "Administrador", agenda: "Agenda", motorista: "Motorista", lider: "Líder" };
+  var rotulosPapel = { admin: "Administrador", agenda: "Agenda", motorista: "Motorista", mapa: "Mapa", lider: "Líder" };
   document.getElementById("heroSubtitulo").textContent = (rotulosPapel[usuario.role] || "Líder") + " · " + usuario.nome;
+
+  // Papel "mapa" só enxerga o mapa (com a busca de locais de votação) — nada de contatos,
+  // gráficos, tabela de carros ou agenda. A API também bloqueia o resto pra esse papel.
+  if (usuario.role === "mapa") {
+    document.getElementById("navAbas").hidden = true;
+    document.getElementById("secaoAgenda").hidden = true;
+    document.getElementById("secaoOperacional").hidden = false;
+    ["blocoContatos", "blocoGraficos", "configCarros", "blocoTabelaLogistica", "avisoNaoLocalizados"].forEach(function (id) {
+      document.getElementById(id).hidden = true;
+    });
+    document.getElementById("tituloLogistica").textContent = "Mapa dos locais de votação";
+    mostrarApp();
+    await carregarLogistica();
+    return;
+  }
 
   var vTudoContatos = usuario.role === "admin" || usuario.role === "motorista";
   document.getElementById("tituloLista").textContent = vTudoContatos ? "Todos os contatos" : "Meus contatos";

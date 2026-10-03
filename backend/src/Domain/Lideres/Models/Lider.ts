@@ -1,4 +1,4 @@
-export type LiderRole = "lider" | "admin" | "agenda" | "motorista";
+export type LiderRole = "lider" | "admin" | "agenda" | "motorista" | "mapa";
 export type LiderStatus = "pendente" | "aprovado" | "rejeitado";
 
 export class Lider {

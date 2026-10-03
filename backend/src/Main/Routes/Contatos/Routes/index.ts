@@ -1,6 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 import { authMiddleware } from "../../../../Presentation/Middlewares/auth";
+import { requireNaoMapa } from "../../../../Presentation/Middlewares/requireNaoMapa";
 import { requireNaoMotorista } from "../../../../Presentation/Middlewares/requireNaoMotorista";
 import {
   makeCreateContatoController,
@@ -19,7 +20,8 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 *
 
 export const contatosRouter = Router();
 
-contatosRouter.use(authMiddleware);
+// Papel "mapa" não enxerga a lista de contatos (só o mapa, em /geo/mapa).
+contatosRouter.use(authMiddleware, requireNaoMapa);
 
 const createContatoController = makeCreateContatoController();
 const listContatosController = makeListContatosController();

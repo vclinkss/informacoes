@@ -16,6 +16,12 @@ const USER_AGENT = "ContatosSandraAlcantara/1.0 (contato: lucassousarbr@gmail.co
 // sem excluir totalmente o resto do país (bounded=0 = preferência, não filtro rígido).
 const VIEWBOX = "-51.30,0.25,-50.85,-0.35";
 
+// Tudo o que o sistema localiza (casas, bairros, escolas) fica no Amapá. Sem esse filtro, uma
+// "Rua Montevideo" sem cidade caía em São Paulo e esticava o mapa pro Brasil inteiro.
+function dentroDoAmapa(lat: number, lng: number): boolean {
+  return lat >= -1.5 && lat <= 4.6 && lng >= -55 && lng <= -49.5;
+}
+
 export class NominatimGeocoder implements IGeocoder {
   async geocodificar(endereco: string): Promise<PontoGeografico | null> {
     const resultados = await this.buscarBruto(endereco, 1);
@@ -36,7 +42,8 @@ export class NominatimGeocoder implements IGeocoder {
     const url =
       "https://nominatim.openstreetmap.org/search?format=json&addressdetails=0&countrycodes=br" +
       "&viewbox=" + VIEWBOX + "&bounded=0" +
-      "&limit=" + limite +
+      // Pede alguns a mais porque os de fora do Amapá são descartados logo abaixo.
+      "&limit=" + Math.max(limite, 5) +
       "&q=" + encodeURIComponent(texto);
 
     try {
@@ -46,11 +53,14 @@ export class NominatimGeocoder implements IGeocoder {
       if (!resp.ok) return [];
 
       const dados = (await resp.json()) as Array<{ lat: string; lon: string; display_name: string }>;
-      return dados.map((r) => ({
-        nome: r.display_name,
-        lat: parseFloat(r.lat),
-        lng: parseFloat(r.lon),
-      }));
+      return dados
+        .map((r) => ({
+          nome: r.display_name,
+          lat: parseFloat(r.lat),
+          lng: parseFloat(r.lon),
+        }))
+        .filter((r) => dentroDoAmapa(r.lat, r.lng))
+        .slice(0, limite);
     } catch {
       return [];
     }

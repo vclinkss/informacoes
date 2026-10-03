@@ -280,15 +280,17 @@
     </div>
     </div>
 
+    <div id="blocoGraficos">
     <h2 class="titulo-secao titulo-secao--espacada">Contatos por bairro e por local de votação</h2>
     <div class="charts">
       <div class="chart-box"><canvas id="chartBairro"></canvas></div>
       <div class="chart-box"><canvas id="chartEscola"></canvas></div>
     </div>
+    </div>
 
-    <h2 class="titulo-secao titulo-secao--espacada">Logística de transporte (bairro → local de votação)</h2>
-    <section class="card">
-      <div class="logistica-config">
+    <h2 class="titulo-secao titulo-secao--espacada" id="tituloLogistica">Logística de transporte (bairro → local de votação)</h2>
+    <section class="card" id="cardLogistica">
+      <div class="logistica-config" id="configCarros">
         <label for="pessoasPorCarro">Pessoas por carro</label>
         <input type="number" id="pessoasPorCarro" min="1" value="4" />
       </div>
@@ -303,7 +305,7 @@
       <div id="resultadosBuscaLocal" class="resultados-locais" hidden></div>
       <div id="mapaLogistica" class="mapa-logistica"></div>
       <p class="detalhe" id="avisoNaoLocalizados"></p>
-      <div class="tabela-scroll">
+      <div class="tabela-scroll" id="blocoTabelaLogistica">
         <table class="tabela-logistica" id="tabelaLogistica">
           <thead>
             <tr><th>Bairro</th><th>Local de votação</th><th>Pessoas</th><th>Carros</th></tr>

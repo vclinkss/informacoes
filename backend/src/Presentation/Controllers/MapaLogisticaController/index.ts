@@ -15,7 +15,9 @@ export class MapaLogisticaController {
   async handle(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       if (!req.userId) throw new AppError("Não autenticado", 401);
-      const liderId = podeVerTudoContatos(req.userRole) ? undefined : Number(req.userId);
+      // Papel "mapa" é um visualizador do mapa geral: vê as rotas de todo mundo, mas só por aqui.
+      const verTudo = podeVerTudoContatos(req.userRole) || req.userRole === "mapa";
+      const liderId = verTudo ? undefined : Number(req.userId);
       const mapa = await this.useCase.execute({ liderId });
 
       if (req.userRole === "admin") {
