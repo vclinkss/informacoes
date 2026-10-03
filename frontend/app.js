@@ -1212,7 +1212,7 @@ function renderLogistica() {
 
 // ---- Locais de votação oficiais do TRE-AP (Eleições 2026) ----
 // Lista pública (zona, seções, endereço) gerada a partir do CSV do TRE, com a coordenada de
-// cada local já resolvida. Fica num JSON estático junto do site: não depende da API.
+// cada local já resolvida. Vem de locais-votacao.js (LOCAIS_TRE), junto do site: não depende da API.
 var locaisTre = null;
 var camadaLocaisTre = null;
 var marcadoresTre = [];
@@ -1225,15 +1225,9 @@ function tresDigitos(n) {
   return String(parseInt(n, 10)).padStart(3, "0");
 }
 
-async function carregarLocaisTre() {
-  if (locaisTre || !mapaLeaflet) return;
-  try {
-    var resp = await fetch("locais-votacao.json");
-    locaisTre = await resp.json();
-  } catch (e) {
-    locaisTre = null;
-    return;
-  }
+function carregarLocaisTre() {
+  if (locaisTre || !mapaLeaflet || typeof LOCAIS_TRE === "undefined") return;
+  locaisTre = LOCAIS_TRE;
   camadaLocaisTre = L.layerGroup().addTo(mapaLeaflet);
   marcadoresTre = locaisTre.map(function (l) {
     var aproximado = l.p !== "escola";
