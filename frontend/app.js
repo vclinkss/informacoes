@@ -1207,7 +1207,182 @@ function renderLogistica() {
   if (bounds.length) mapaLeaflet.fitBounds(bounds, { padding: [24, 24] });
 
   setTimeout(function () { mapaLeaflet.invalidateSize(); }, 150);
+  carregarLocaisTre();
 }
+
+// ---- Locais de votação oficiais do TRE-AP (Eleições 2026) ----
+// Lista pública (zona, seções, endereço) gerada a partir do CSV do TRE, com a coordenada de
+// cada local já resolvida. Fica num JSON estático junto do site: não depende da API.
+var locaisTre = null;
+var camadaLocaisTre = null;
+var marcadoresTre = [];
+
+function normalizarBusca(texto) {
+  return String(texto || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+}
+
+function tresDigitos(n) {
+  return String(parseInt(n, 10)).padStart(3, "0");
+}
+
+async function carregarLocaisTre() {
+  if (locaisTre || !mapaLeaflet) return;
+  try {
+    var resp = await fetch("locais-votacao.json");
+    locaisTre = await resp.json();
+  } catch (e) {
+    locaisTre = null;
+    return;
+  }
+  camadaLocaisTre = L.layerGroup().addTo(mapaLeaflet);
+  marcadoresTre = locaisTre.map(function (l) {
+    var aproximado = l.p !== "escola";
+    var marcador = L.circleMarker([l.lat, l.lng], {
+      radius: 5,
+      color: "#1F6E56",
+      weight: 2,
+      fillColor: aproximado ? "#F3F3F3" : "#FFFFFF",
+      fillOpacity: 1,
+      dashArray: aproximado ? "2,2" : null,
+    });
+    marcador.bindTooltip(
+      "<strong>" + escaparAtributo(l.n) + "</strong><br>Zona " + l.z + " · " + l.s.length + " seç" + (l.s.length === 1 ? "ão" : "ões"),
+      { direction: "top", offset: [0, -4] }
+    );
+    marcador.bindPopup(popupLocalTre(l), { maxWidth: 300 });
+    return marcador;
+  });
+
+  var selectZona = document.getElementById("filtroZona");
+  var zonas = {};
+  locaisTre.forEach(function (l) { zonas[l.z] = l.m; });
+  Object.keys(zonas).sort().forEach(function (z) {
+    var opt = document.createElement("option");
+    opt.value = z;
+    opt.textContent = "Zona " + z;
+    selectZona.appendChild(opt);
+  });
+
+  filtrarLocaisTre(false);
+}
+
+function popupLocalTre(l) {
+  var rotulosPrecisao = { rua: "rua do endereço", bairro: "bairro/localidade", cidade: "centro do município" };
+  return (
+    '<div class="pin-popup popup-tre">' +
+    "<strong>" + escaparAtributo(l.n) + "</strong>" +
+    '<div class="detalhe">' + escaparAtributo(l.e) + " · " + escaparAtributo(l.m) + "</div>" +
+    '<div class="popup-tre-linha"><b>Zona ' + l.z + "</b> · local " + l.c + " · " + l.el.toLocaleString("pt-BR") + " eleitores</div>" +
+    '<div class="popup-tre-secoes"><b>Seções (' + l.s.length + "):</b> " + l.s.join(", ") + "</div>" +
+    (l.o ? '<div class="popup-tre-aviso">' + escaparAtributo(l.o) + "</div>" : "") +
+    (l.p !== "escola" ? '<div class="popup-tre-aviso">Localização aproximada (' + rotulosPrecisao[l.p] + ")</div>" : "") +
+    '<a href="' + googleMapsRotaLink(l.lat, l.lng) + '" target="_blank" rel="noopener">Como chegar</a>' +
+    "</div>"
+  );
+}
+
+// Entende: texto livre (nome/bairro/cidade), "104" ou "seção 104" (nº da seção),
+// "zona 6" e "6/104" (zona + seção).
+function interpretarBuscaLocal(texto) {
+  var q = normalizarBusca(texto);
+  var filtro = { zona: null, secao: null, palavras: [] };
+  var zonaSecao = q.match(/^(\d{1,3})\s*[\/-]\s*(\d{1,3})$/);
+  if (zonaSecao) {
+    filtro.zona = tresDigitos(zonaSecao[1]);
+    filtro.secao = tresDigitos(zonaSecao[2]);
+    return filtro;
+  }
+  q = q.replace(/\bz(?:ona)?\s*(\d{1,3})\b/, function (_, n) { filtro.zona = tresDigitos(n); return " "; });
+  q = q.replace(/\bs(?:ecao|ec)?\s*(\d{1,3})\b/, function (_, n) { filtro.secao = tresDigitos(n); return " "; });
+  q = q.trim();
+  if (/^\d{1,3}$/.test(q)) {
+    filtro.secao = tresDigitos(q);
+    q = "";
+  }
+  filtro.palavras = q ? q.split(/\s+/) : [];
+  return filtro;
+}
+
+function filtrarLocaisTre(aproximar) {
+  if (!locaisTre || !camadaLocaisTre) return;
+  var texto = document.getElementById("buscaLocal").value;
+  var zonaSelecionada = document.getElementById("filtroZona").value;
+  var mostrarTodos = document.getElementById("mostrarLocaisTre").checked;
+  var filtro = interpretarBuscaLocal(texto);
+  var zona = filtro.zona || zonaSelecionada || null;
+  var buscando = !!(texto.trim() || zonaSelecionada);
+
+  var encontrados = [];
+  locaisTre.forEach(function (l, i) {
+    if (zona && l.z !== zona) return;
+    if (filtro.secao && l.s.indexOf(filtro.secao) === -1) return;
+    if (filtro.palavras.length) {
+      var alvo = normalizarBusca(l.n + " " + l.e + " " + l.m);
+      for (var k = 0; k < filtro.palavras.length; k++) {
+        if (alvo.indexOf(filtro.palavras[k]) === -1) return;
+      }
+    }
+    encontrados.push(i);
+  });
+
+  camadaLocaisTre.clearLayers();
+  var visiveis = buscando ? encontrados : (mostrarTodos ? encontrados : []);
+  visiveis.forEach(function (i) { camadaLocaisTre.addLayer(marcadoresTre[i]); });
+
+  var elResultados = document.getElementById("resultadosBuscaLocal");
+  if (!buscando) {
+    elResultados.hidden = true;
+    elResultados.innerHTML = "";
+    return;
+  }
+  elResultados.hidden = false;
+  if (!encontrados.length) {
+    elResultados.innerHTML = '<p class="detalhe">Nenhum local de votação encontrado.</p>';
+    return;
+  }
+  var LIMITE = 40;
+  elResultados.innerHTML =
+    '<p class="detalhe">' + encontrados.length + " local(is) encontrado(s)" +
+    (encontrados.length > LIMITE ? " · mostrando os " + LIMITE + " primeiros na lista (todos estão no mapa)" : "") + "</p>" +
+    encontrados.slice(0, LIMITE).map(function (i) {
+      var l = locaisTre[i];
+      return (
+        '<button type="button" class="resultado-local" data-idx="' + i + '">' +
+        "<strong>" + escaparAtributo(l.n) + "</strong>" +
+        "<span>" + escaparAtributo(l.m) + " · Zona " + l.z +
+        (filtro.secao ? " · <b>Seção " + filtro.secao + "</b>" : " · " + l.s.length + " seç" + (l.s.length === 1 ? "ão" : "ões")) +
+        "</span></button>"
+      );
+    }).join("");
+
+  if (aproximar) {
+    if (encontrados.length === 1) {
+      abrirLocalTre(encontrados[0]);
+    } else {
+      var pontos = encontrados.map(function (i) { return [locaisTre[i].lat, locaisTre[i].lng]; });
+      mapaLeaflet.fitBounds(pontos, { padding: [24, 24], maxZoom: 16 });
+    }
+  }
+}
+
+function abrirLocalTre(i) {
+  var l = locaisTre[i];
+  if (!camadaLocaisTre.hasLayer(marcadoresTre[i])) camadaLocaisTre.addLayer(marcadoresTre[i]);
+  mapaLeaflet.setView([l.lat, l.lng], 16);
+  marcadoresTre[i].openPopup();
+}
+
+var esperaBuscaLocal = null;
+document.getElementById("buscaLocal").addEventListener("input", function () {
+  clearTimeout(esperaBuscaLocal);
+  esperaBuscaLocal = setTimeout(function () { filtrarLocaisTre(true); }, 250);
+});
+document.getElementById("filtroZona").addEventListener("change", function () { filtrarLocaisTre(true); });
+document.getElementById("mostrarLocaisTre").addEventListener("change", function () { filtrarLocaisTre(false); });
+document.getElementById("resultadosBuscaLocal").addEventListener("click", function (e) {
+  var botao = e.target.closest(".resultado-local");
+  if (botao) abrirLocalTre(parseInt(botao.dataset.idx, 10));
+});
 
 // ---- Corrigir manualmente um bairro/local que o mapa não achou sozinho (ou achou errado) ----
 var corrigindoNome = null;

@@ -293,6 +293,14 @@
         <input type="number" id="pessoasPorCarro" min="1" value="4" />
       </div>
       <p class="detalhe" id="resumoLogistica">Carregando...</p>
+      <div class="busca-locais">
+        <input type="search" id="buscaLocal" placeholder="Buscar local de votação: nome, bairro ou nº da seção" autocomplete="off" />
+        <select id="filtroZona" aria-label="Filtrar por zona eleitoral">
+          <option value="">Todas as zonas</option>
+        </select>
+      </div>
+      <label class="check-locais"><input type="checkbox" id="mostrarLocaisTre" checked /> Mostrar todos os locais de votação do TRE</label>
+      <div id="resultadosBuscaLocal" class="resultados-locais" hidden></div>
       <div id="mapaLogistica" class="mapa-logistica"></div>
       <p class="detalhe" id="avisoNaoLocalizados"></p>
       <div class="tabela-scroll">
