@@ -1185,7 +1185,8 @@ function renderLogistica() {
 
   document.getElementById("resumoLogistica").textContent =
     rotas.length
-      ? rotas.length + " rota(s) · " + totalPessoas + " pessoa(s) · aproximadamente " + totalCarros + " carro(s) no total"
+      ? "Só quem precisa de carona: " + plural(totalPessoas, "pessoa", "pessoas") + " · " +
+        plural(rotas.length, "rota (bairro → escola)", "rotas (bairro → escola)") + " · aproximadamente " + plural(totalCarros, "carro", "carros")
       : "Nenhum contato com bairro/local de votação pra calcular ainda.";
 
   var elAviso = document.getElementById("avisoNaoLocalizados");
@@ -1209,7 +1210,8 @@ function renderLogistica() {
   document.getElementById("corpoTabelaLogistica").innerHTML = rotas.map(function (r) {
     var carros = Math.ceil(r.total / capacidade);
     return (
-      "<tr><td>" + escaparAtributo(r.bairro) + "</td><td>" + escaparAtributo(r.localVotacao) + "</td><td>" + r.total + "</td><td>" + carros + "</td></tr>"
+      "<tr><td>" + (r.bairro ? escaparAtributo(r.bairro) : '<em class="detalhe">sem bairro</em>') + "</td><td>" +
+      (r.localVotacao ? escaparAtributo(r.localVotacao) : '<em class="detalhe">sem local de votação</em>') + "</td><td>" + r.total + "</td><td>" + carros + "</td></tr>"
     );
   }).join("") || '<tr><td colspan="4" class="detalhe">Sem dados ainda.</td></tr>';
 
@@ -1290,7 +1292,7 @@ function renderLogistica() {
 var locaisTre = null;
 var camadaLocaisTre = null;
 var marcadoresTre = [];
-var totaisTre = {}; // índice do local -> quantos contatos nossos votam lá (pela zona/seção)
+var totaisTre = {}; // índice do local -> { total, carona }: contatos nossos que votam lá (pela zona/seção)
 
 function normalizarBusca(texto) {
   return String(texto || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
@@ -1332,14 +1334,25 @@ function carregarLocaisTre() {
   filtrarLocaisTre(false);
 }
 
-function textoTotalTre(total) {
-  return total ? total + (total === 1 ? " pessoa nossa vota aqui" : " pessoas nossas votam aqui") : "";
+function plural(n, singular, pluralTexto) {
+  return n + " " + (n === 1 ? singular : pluralTexto);
 }
 
-function tooltipLocalTre(l, total) {
+// "30 pessoas nossas votam aqui" + o detalhe de carona (é o que a tabela de logística conta).
+function textoTotalTre(t) {
+  if (!t || !t.total) return "";
+  return plural(t.total, "pessoa nossa vota aqui", "pessoas nossas votam aqui");
+}
+
+function textoCaronaTre(t) {
+  if (!t || !t.total) return "";
+  return plural(t.carona, "precisa de carona", "precisam de carona") + " · " + plural(t.total - t.carona, "sem carona", "sem carona");
+}
+
+function tooltipLocalTre(l, t) {
   return (
-    "<strong>" + escaparAtributo(l.n) + "</strong><br>Zona " + l.z + " · " + l.s.length + " seç" + (l.s.length === 1 ? "ão" : "ões") +
-    (total ? '<br><b class="total-tre">' + textoTotalTre(total) + "</b>" : "")
+    "<strong>" + escaparAtributo(l.n) + "</strong><br>Zona " + l.z + " · " + plural(l.s.length, "seção", "seções") +
+    (t && t.total ? '<br><b class="total-tre">' + textoTotalTre(t) + "</b><br>" + textoCaronaTre(t) : "")
   );
 }
 
@@ -1357,31 +1370,58 @@ async function carregarContagemTre() {
     l.s.forEach(function (secao) { indice[l.z + "/" + secao] = i; });
   });
   totaisTre = {};
-  contagem.forEach(function (c) {
+  var resumo = { total: 0, carona: 0, foraTre: 0, foraTreCarona: 0 };
+  contagem.secoes.forEach(function (c) {
     var i = indice[c.zona + "/" + c.secao];
-    if (i !== undefined) totaisTre[i] = (totaisTre[i] || 0) + c.total;
+    if (i === undefined) {
+      // zona/seção preenchida, mas que não existe na lista do TRE 2026 (número antigo ou digitado errado)
+      resumo.foraTre += c.total;
+      resumo.foraTreCarona += c.carona;
+      return;
+    }
+    var t = totaisTre[i] || (totaisTre[i] = { total: 0, carona: 0 });
+    t.total += c.total;
+    t.carona += c.carona;
+    resumo.total += c.total;
+    resumo.carona += c.carona;
   });
+  mostrarResumoTre(resumo, contagem);
   marcadoresTre.forEach(function (marcador, i) {
     var l = locaisTre[i];
-    var total = totaisTre[i] || 0;
-    marcador.setTooltipContent(tooltipLocalTre(l, total));
-    marcador.setPopupContent(popupLocalTre(l, total));
-    if (total) {
+    var t = totaisTre[i];
+    marcador.setTooltipContent(tooltipLocalTre(l, t));
+    marcador.setPopupContent(popupLocalTre(l, t));
+    if (t) {
       marcador.setStyle({ fillColor: "#F2C94C", color: "#0F3D30" });
-      marcador.setRadius(Math.min(14, 6 + Math.sqrt(total) * 1.6));
+      marcador.setRadius(Math.min(14, 6 + Math.sqrt(t.total) * 1.6));
     }
   });
   filtrarLocaisTre(false);
 }
 
-function popupLocalTre(l, total) {
+// Explica de onde vêm (e o que fica de fora) os totais das escolas.
+function mostrarResumoTre(r, contagem) {
+  var partes = [
+    "<b>Nas escolas do mapa:</b> " + plural(r.total, "pessoa", "pessoas") + " (" + plural(r.carona, "precisa", "precisam") + " de carona, " +
+      (r.total - r.carona) + " não).",
+  ];
+  var fora = [];
+  if (contagem.semZonaSecao) fora.push(plural(contagem.semZonaSecao, "contato sem zona/seção", "contatos sem zona/seção") + " (" + contagem.semZonaSecaoCarona + " com carona)");
+  if (r.foraTre) fora.push(plural(r.foraTre, "com zona/seção que não existe no TRE 2026", "com zona/seção que não existe no TRE 2026") + " (" + r.foraTreCarona + " com carona)");
+  if (fora.length) partes.push("<b>Fora desses totais:</b> " + fora.join(" e ") + " — dá pra corrigir editando a zona/seção do contato.");
+  var el = document.getElementById("resumoTre");
+  el.innerHTML = partes.join("<br>");
+  el.hidden = false;
+}
+
+function popupLocalTre(l, t) {
   var rotulosPrecisao = { rua: "rua do endereço", bairro: "bairro/localidade", cidade: "centro do município" };
   return (
     '<div class="pin-popup popup-tre">' +
     "<strong>" + escaparAtributo(l.n) + "</strong>" +
     '<div class="detalhe">' + escaparAtributo(l.e) + " · " + escaparAtributo(l.m) + "</div>" +
     '<div class="popup-tre-linha"><b>Zona ' + l.z + "</b> · local " + l.c + " · " + l.el.toLocaleString("pt-BR") + " eleitores</div>" +
-    (total ? '<div class="popup-tre-linha total-tre">' + textoTotalTre(total) + "</div>" : "") +
+    (t && t.total ? '<div class="popup-tre-linha total-tre">' + textoTotalTre(t) + "</div><div>" + textoCaronaTre(t) + "</div>" : "") +
     '<div class="popup-tre-secoes"><b>Seções (' + l.s.length + "):</b> " + l.s.join(", ") + "</div>" +
     (l.o ? '<div class="popup-tre-aviso">' + escaparAtributo(l.o) + "</div>" : "") +
     (l.p !== "escola" ? '<div class="popup-tre-aviso">Localização aproximada (' + rotulosPrecisao[l.p] + ")</div>" : "") +
@@ -1459,7 +1499,7 @@ function filtrarLocaisTre(aproximar) {
         '<button type="button" class="resultado-local" data-idx="' + i + '">' +
         "<strong>" + escaparAtributo(l.n) + "</strong>" +
         "<span>" + escaparAtributo(l.m) + " · Zona " + l.z +
-        (totaisTre[i] ? " · <b>" + textoTotalTre(totaisTre[i]) + "</b>" : "") +
+        (totaisTre[i] ? " · <b>" + textoTotalTre(totaisTre[i]) + "</b> (" + textoCaronaTre(totaisTre[i]) + ")" : "") +
         (filtro.secao ? " · <b>Seção " + filtro.secao + "</b>" : " · " + l.s.length + " seç" + (l.s.length === 1 ? "ão" : "ões")) +
         "</span></button>"
       );

@@ -1377,3 +1377,8 @@ body.sem-rolagem {
   width: 100%;
   height: 100%;
 }
+
+.resumo-tre {
+  margin: 8px 0 0;
+  line-height: 1.5;
+}
